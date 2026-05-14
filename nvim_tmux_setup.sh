@@ -60,7 +60,9 @@ if [ -d "$NVIM_CONFIG" ]; then
     mv "$NVIM_CONFIG" "${NVIM_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
 fi
 for d in "$NVIM_DATA" "$NVIM_CACHE" "$NVIM_STATE"; do
-    [ -d "$d" ] && mv "$d" "${d}.bak" 2>/dev/null || true
+    if [ -d "$d" ];then
+        mv "$d" "${d}.bak" 2>/dev/null || true
+    fi
 done
 
 sudo -u "$REAL_USER" git clone https://github.com/LazyVim/starter "$NVIM_CONFIG"
