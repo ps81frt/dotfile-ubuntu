@@ -2,6 +2,8 @@ sudo rm -f /usr/local/bin/install-lsp-servers
 sudo tee /usr/local/bin/install-lsp-servers << 'EOF'
 #!/bin/bash
 echo "=== Installation des serveurs LSP ==="
+sudo apt install -y lua5.4
+npm install -g lua-language-server
 
 # Python LSP servers with pipx (recommandé par Ubuntu)
 if ! command -v pipx &> /dev/null; then
