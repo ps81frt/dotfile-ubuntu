@@ -1,5 +1,5 @@
 #!/bin/bash
-# nvim_tmux_setup.sh — LazyVim + Tmux AZERTY fr_FR
+# nvim_tmux_setup.sh — LazyVim + Tmux AZERTY fr_FR + ShellCheck
 # Usage : sudo bash nvim_tmux_setup.sh
 
 set -e
@@ -12,10 +12,10 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-print_info()    { echo -e "${GREEN}[INFO]${NC} $1"; }
+print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-print_error()   { echo -e "${RED}[ERR ]${NC} $1"; }
-print_step()    { echo -e "\n${BLUE}==>${NC} $1"; }
+print_error() { echo -e "${RED}[ERR ]${NC} $1"; }
+print_step() { echo -e "\n${BLUE}==>${NC} $1"; }
 
 if [ -n "$SUDO_USER" ]; then
     REAL_USER="$SUDO_USER"
@@ -35,6 +35,15 @@ apt install -y \
     neovim tmux git curl wget ripgrep fd-find fzf tree \
     nodejs npm python3 python3-pip python3-venv python3-pynvim \
     build-essential unzip xclip xsel
+
+print_info "Installation de ShellCheck depuis GitHub..."
+wget -q https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.linux.x86_64.tar.xz
+tar -xf shellcheck-v0.10.0.linux.x86_64.tar.xz
+cp shellcheck-v0.10.0/shellcheck /usr/local/bin/
+rm -rf shellcheck-v0.10.0*
+chmod +x /usr/local/bin/shellcheck
+print_info "ShellCheck installe"
+
 npm install -g neovim 2>/dev/null || true
 
 # ============================================================
@@ -65,7 +74,7 @@ sudo -u "$REAL_USER" mkdir -p "$NVIM_CONFIG/lua/config"
 sudo -u "$REAL_USER" mkdir -p "$NVIM_CONFIG/lua/plugins"
 
 # options.lua
-cat > "$NVIM_CONFIG/lua/config/options.lua" << 'EOF'
+cat >"$NVIM_CONFIG/lua/config/options.lua" <<'EOF'
 vim.opt.number         = true
 vim.opt.relativenumber = true
 vim.opt.tabstop        = 4
@@ -91,56 +100,46 @@ vim.opt.timeoutlen     = 300
 EOF
 
 # keymaps.lua
-cat > "$NVIM_CONFIG/lua/config/keymaps.lua" << 'EOF'
+cat >"$NVIM_CONFIG/lua/config/keymaps.lua" <<'EOF'
 local map = vim.keymap.set
 
--- Sauvegarde / Quitter
 map("n", "<C-s>", "<cmd>w<CR>",      { desc = "Sauvegarder" })
 map("i", "<C-s>", "<Esc><cmd>w<CR>", { desc = "Sauvegarder (insert)" })
 map("n", "<C-q>", "<cmd>q<CR>",      { desc = "Quitter" })
 
--- Navigation splits — Ctrl+Fleches
 map("n", "<C-Left>",  "<C-w>h", { desc = "Split gauche" })
 map("n", "<C-Down>",  "<C-w>j", { desc = "Split bas" })
 map("n", "<C-Up>",    "<C-w>k", { desc = "Split haut" })
 map("n", "<C-Right>", "<C-w>l", { desc = "Split droite" })
 
--- Resize splits — Alt+Fleches
 map("n", "<A-Left>",  "<C-w><", { desc = "Reduire largeur" })
 map("n", "<A-Right>", "<C-w>>", { desc = "Augmenter largeur" })
 map("n", "<A-Up>",    "<C-w>+", { desc = "Augmenter hauteur" })
 map("n", "<A-Down>",  "<C-w>-", { desc = "Reduire hauteur" })
 
--- Buffers
 map("n", "<Tab>",      "<cmd>bnext<CR>",     { desc = "Buffer suivant" })
 map("n", "<S-Tab>",    "<cmd>bprevious<CR>", { desc = "Buffer precedent" })
 map("n", "<leader>bd", "<cmd>bdelete<CR>",   { desc = "Fermer buffer" })
 
--- Deplacer lignes (visuel)
 map("v", "<A-Down>", ":m '>+1<CR>gv=gv", { desc = "Ligne bas" })
 map("v", "<A-Up>",   ":m '<-2<CR>gv=gv", { desc = "Ligne haut" })
 
--- Indentation
 map("v", "<", "<gv", { desc = "Desindenter" })
 map("v", ">", ">gv", { desc = "Indenter" })
 
--- Recherche centree
 map("n", "n", "nzzzv")
 map("n", "N", "Nzzzv")
 
--- Diagnostic
 map("n", "[d", vim.diagnostic.goto_prev, { desc = "Diagnostic precedent" })
 map("n", "]d", vim.diagnostic.goto_next, { desc = "Diagnostic suivant" })
 EOF
 
 # plugins/extras.lua
-cat > "$NVIM_CONFIG/lua/plugins/extras.lua" << 'EOF'
+cat >"$NVIM_CONFIG/lua/plugins/extras.lua" <<'EOF'
 return {
 
-  -- Theme TokyoNight night
   { "folke/tokyonight.nvim", opts = { style = "night" } },
 
-  -- LSP moderne : ts_ls (remplace tsserver deprecie)
   {
     "neovim/nvim-lspconfig",
     opts = {
@@ -155,7 +154,15 @@ return {
             },
           },
         },
-        bashls = {},
+        bashls = {
+          settings = {
+            bashIde = {
+              shellcheckPath = "/usr/local/bin/shellcheck",
+              enableShellCheck = true,
+              externalSources = true,
+            }
+          }
+        },
         html   = {},
         cssls  = {},
         jsonls = {},
@@ -164,7 +171,6 @@ return {
     },
   },
 
-  -- Treesitter
   {
     "nvim-treesitter/nvim-treesitter",
     opts = {
@@ -182,7 +188,6 @@ return {
   { "folke/zen-mode.nvim", cmd = "ZenMode" },
   { "kylechui/nvim-surround", event = "VeryLazy", opts = {} },
 
-  -- Harpoon2
   {
     "ThePrimeagen/harpoon",
     branch       = "harpoon2",
@@ -197,7 +202,6 @@ return {
     },
   },
 
-  -- Gitsigns
   {
     "lewis6991/gitsigns.nvim",
     opts = {
@@ -226,10 +230,7 @@ print_info "Plugins installes."
 # ============================================================
 print_step "Configuration Tmux (AZERTY)..."
 
-cat > "${REAL_HOME}/.tmux.conf" << 'TMUXEOF'
-# ============================================================
-#  Tmux — AZERTY fr_FR  |  Prefix : Ctrl+A
-# ============================================================
+cat >"${REAL_HOME}/.tmux.conf" <<'TMUXEOF'
 set -g default-terminal "tmux-256color"
 set -ga terminal-overrides ",xterm-256color:Tc"
 set -sg escape-time 10
@@ -240,7 +241,6 @@ set -g renumber-windows on
 set -g mouse on
 set -g history-limit 10000
 
-# Barre de statut (style TokyoNight)
 set -g status-position bottom
 set -g status-bg "#1a1b26"
 set -g status-fg "#a9b1d6"
@@ -254,13 +254,11 @@ set -g pane-border-style            "fg=#3b4261"
 set -g pane-active-border-style     "fg=#7aa2f7"
 set -g message-style                "fg=#7aa2f7,bg=#1a1b26"
 
-# PREFIX Ctrl+A
 unbind C-b
 set -g prefix C-a
 bind C-a send-prefix
 bind r source-file ~/.tmux.conf \; display "tmux.conf rechargé"
 
-# SPLITS
 unbind '"'
 unbind %
 bind v split-window -h -c "#{pane_current_path}"
@@ -268,24 +266,19 @@ bind b split-window -v -c "#{pane_current_path}"
 bind | split-window -h -c "#{pane_current_path}"
 bind = split-window -v -c "#{pane_current_path}"
 
-# NAVIGATION — 3 methodes
-# 1) Alt+Fleche (sans prefix, le plus rapide)
 bind -n M-Left  select-pane -L
 bind -n M-Right select-pane -R
 bind -n M-Up    select-pane -U
 bind -n M-Down  select-pane -D
-# 2) Prefix + Fleches
 bind Left  select-pane -L
 bind Right select-pane -R
 bind Up    select-pane -U
 bind Down  select-pane -D
-# 3) Prefix + hjkl (vim)
 bind h select-pane -L
 bind j select-pane -D
 bind k select-pane -U
 bind l select-pane -R
 
-# RESIZE
 bind -r C-Left  resize-pane -L 3
 bind -r C-Right resize-pane -R 3
 bind -r C-Up    resize-pane -U 3
@@ -295,19 +288,16 @@ bind -r S-Right resize-pane -R 10
 bind -r S-Up    resize-pane -U 5
 bind -r S-Down  resize-pane -D 5
 
-# FENETRES
 bind c   new-window -c "#{pane_current_path}"
 bind x   kill-pane
 bind X   kill-window
 bind Tab  next-window
 bind BTab previous-window
 
-# SESSIONS
 bind s choose-session
 bind d detach
 bind N new-session
 
-# COPY MODE vi
 setw -g mode-keys vi
 bind [ copy-mode
 bind -T copy-mode-vi v      send-keys -X begin-selection
@@ -320,14 +310,11 @@ bind -T copy-mode-vi Right  send-keys -X cursor-right
 bind -T copy-mode-vi Up     send-keys -X cursor-up
 bind -T copy-mode-vi Down   send-keys -X cursor-down
 
-# Coller depuis clipboard systeme
 bind p run "xclip -o -sel clip 2>/dev/null | tmux load-buffer - && tmux paste-buffer || tmux paste-buffer"
 
-# WELCOME SCREEN — Ctrl+A W pour reafficher
 bind W run-shell 'tmux display-popup -E -w 74 -h 38 -x C -y C "bash ~/.tmux-welcome.sh"'
 set-hook -g session-created 'run-shell "sleep 0.3 && tmux display-popup -E -w 74 -h 38 -x C -y C \"bash ~/.tmux-welcome.sh\""'
 
-# PLUGINS TPM
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
@@ -339,8 +326,7 @@ set -g @continuum-save-interval '15'
 if-shell "test -f ~/.tmux/plugins/tpm/tpm" "run '~/.tmux/plugins/tpm/tpm'"
 TMUXEOF
 
-# ── Welcome screen script ────────────────────────────────────
-cat > "${REAL_HOME}/.tmux-welcome.sh" << 'WELCOMEOF'
+cat >"${REAL_HOME}/.tmux-welcome.sh" <<'WELCOMEOF'
 #!/bin/bash
 C='\033[0;36m'; G='\033[0;32m'; Y='\033[1;33m'
 D='\033[2;37m'; B='\033[1m';    R='\033[0m'
@@ -356,39 +342,31 @@ printf "${R}\n"
 printf "${D}  ──────────────────────────────────────────────────────${R}\n"
 printf "  ${Y}${B}PREFIX : Ctrl+A${R}\n"
 printf "${D}  ──────────────────────────────────────────────────────${R}\n\n"
-
 printf "${G}${B}  SPLITS${R}\n"
 printf "  ${C}Ctrl+A v${R}   split vertical   (cote a cote)\n"
 printf "  ${C}Ctrl+A b${R}   split horizontal (haut / bas)\n\n"
-
 printf "${G}${B}  NAVIGATION panes${R}  ${D}(3 methodes)${R}\n"
 printf "  ${C}Alt + Fleches${R}            sans prefix  ${D}[le plus rapide]${R}\n"
 printf "  ${C}Ctrl+A + Fleches${R}         avec prefix\n"
 printf "  ${C}Ctrl+A + h j k l${R}         vim-style\n\n"
-
 printf "${G}${B}  RESIZE panes${R}\n"
 printf "  ${C}Ctrl+A + Ctrl + Fleches${R}  +3  (repetable)\n"
 printf "  ${C}Ctrl+A + Maj  + Fleches${R}  +10 (grand pas)\n\n"
-
 printf "${G}${B}  FENETRES${R}\n"
 printf "  ${C}Ctrl+A c${R}    nouvelle fenetre\n"
 printf "  ${C}Ctrl+A Tab${R}  fenetre suivante\n"
 printf "  ${C}Ctrl+A 1-9${R}  aller a la fenetre N\n"
 printf "  ${C}Ctrl+A x${R}    fermer pane    ${C}Ctrl+A X${R}  fermer fenetre\n\n"
-
 printf "${G}${B}  SESSIONS${R}\n"
 printf "  ${C}Ctrl+A s${R}   choisir    ${C}Ctrl+A d${R}  detacher\n"
 printf "  ${C}Ctrl+A N${R}   nouvelle session\n\n"
-
 printf "${G}${B}  COPY MODE${R}\n"
 printf "  ${C}Ctrl+A [${R}   entrer      Fleches ou hjkl pour naviguer\n"
 printf "  ${C}v${R} selectionner    ${C}y${R} copier    ${C}q${R} quitter\n\n"
-
 printf "${G}${B}  DIVERS${R}\n"
 printf "  ${C}Ctrl+A r${R}   recharger tmux.conf\n"
 printf "  ${C}Ctrl+A W${R}   reafficher cette aide\n"
 printf "  ${C}Ctrl+A p${R}   coller depuis clipboard systeme\n\n"
-
 printf "${D}  ──────────────────────────────────────────────────────${R}\n"
 printf "  ${D}Appuie sur une touche pour fermer...${R}\n"
 read -n 1 -s
@@ -410,11 +388,11 @@ sudo -u "$REAL_USER" \
 # 7. ALIAS
 # ============================================================
 print_step "Configuration des alias..."
-[ -f "${REAL_HOME}/.zshrc" ] && ALIAS_FILE="${REAL_HOME}/.zsh_aliases" \
-                              || ALIAS_FILE="${REAL_HOME}/.bash_aliases"
+[ -f "${REAL_HOME}/.zshrc" ] && ALIAS_FILE="${REAL_HOME}/.zsh_aliases" ||
+    ALIAS_FILE="${REAL_HOME}/.bash_aliases"
 
 if ! grep -q "# === Alias NVIM/TMUX ===" "$ALIAS_FILE" 2>/dev/null; then
-cat >> "$ALIAS_FILE" << 'ALIASEOF'
+    cat >>"$ALIAS_FILE" <<'ALIASEOF'
 # === Alias NVIM/TMUX ===
 alias v='nvim'
 alias vim='nvim'
@@ -445,13 +423,13 @@ svim()    { sudo -E nvim "$@"; }
 project() { cd "$1" && nvim .; }
 ALIASEOF
 fi
-! grep -q "bash_aliases" "${REAL_HOME}/.bashrc" 2>/dev/null && \
-    echo -e "\n[ -f ~/.bash_aliases ] && source ~/.bash_aliases" >> "${REAL_HOME}/.bashrc"
+! grep -q "bash_aliases" "${REAL_HOME}/.bashrc" 2>/dev/null &&
+    echo -e "\n[ -f ~/.bash_aliases ] && source ~/.bash_aliases" >>"${REAL_HOME}/.bashrc"
 
 # ============================================================
 # 8. SCRIPT install-lsp-servers
 # ============================================================
-cat > /usr/local/bin/install-lsp-servers << 'LSPEOF'
+cat >/usr/local/bin/install-lsp-servers <<'LSPEOF'
 #!/bin/bash
 echo "=== Installation des serveurs LSP ==="
 pip install python-lsp-server pylsp-mypy pylsp-black --break-system-packages 2>/dev/null || \
@@ -470,9 +448,9 @@ chmod +x /usr/local/bin/install-lsp-servers
 # ============================================================
 chown -R "$REAL_USER:$REAL_USER" "${REAL_HOME}/.config/nvim"
 chown -R "$REAL_USER:$REAL_USER" "${REAL_HOME}/.local/share/nvim" 2>/dev/null || true
-chown     "$REAL_USER:$REAL_USER" "${REAL_HOME}/.tmux.conf"
-chown     "$REAL_USER:$REAL_USER" "${REAL_HOME}/.tmux-welcome.sh"
-chown     "$REAL_USER:$REAL_USER" "$ALIAS_FILE"
+chown "$REAL_USER:$REAL_USER" "${REAL_HOME}/.tmux.conf"
+chown "$REAL_USER:$REAL_USER" "${REAL_HOME}/.tmux-welcome.sh"
+chown "$REAL_USER:$REAL_USER" "$ALIAS_FILE"
 
 # ============================================================
 # 10. RESUME
@@ -482,7 +460,7 @@ echo -e "${CYAN}╔════════════════════�
 echo -e "${CYAN}║   ${GREEN}${BOLD}Installation terminee !${NC}                          ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${GREEN}LazyVim :${NC} ts_ls + pyright + lua_ls | Treesitter | Harpoon2 | TokyoNight"
+echo -e "${GREEN}LazyVim :${NC} ts_ls + pyright + lua_ls + bashls (ShellCheck) | Treesitter | Harpoon2 | TokyoNight"
 echo -e "${GREEN}Tmux    :${NC} Welcome screen | Alt+Fleches | Ctrl+A v/b | Resize Ctrl+Fl."
 echo ""
 echo -e "${YELLOW}Etapes suivantes :${NC}"
