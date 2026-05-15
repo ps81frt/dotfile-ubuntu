@@ -5,8 +5,7 @@
 ########################################
 
 # Vérification root
-if [[ $(id -u) -eq 0 ]]
-then
+if [[ $(id -u) -eq 0 ]]; then
     echo -e "\033[31mATTENTION\033[0m"
     echo "Vous lancez ce script en root."
     echo "La session GNOME root sera modifiée."
@@ -123,11 +122,14 @@ gsettings set org.gtk.gtk4.Settings.FileChooser sort-directories-first true
 ########################################
 # GNOME SOFTWARE
 ########################################
-
 echo "Configuration GNOME Software"
 
-gsettings set org.gnome.software download-updates false
-gsettings set org.gnome.software show-only-free-apps false
+if gsettings list-schemas | grep -q "org.gnome.software"; then
+    gsettings set org.gnome.software download-updates false
+    gsettings set org.gnome.software show-only-free-apps false
+else
+    echo "GNOME Software absent, ignoré."
+fi
 
 ########################################
 # TEXT EDITOR
@@ -145,9 +147,13 @@ gsettings set org.gnome.TextEditor show-line-numbers true
 
 echo "Configuration GNOME Web"
 
-gsettings set org.gnome.Epiphany ask-for-default false
-gsettings set org.gnome.Epiphany homepage-url 'about:blank'
-gsettings set org.gnome.Epiphany start-in-incognito-mode true
+if gsettings list-schemas | grep -q "org.gnome.Epiphany"; then
+    gsettings set org.gnome.Epiphany ask-for-default false
+    gsettings set org.gnome.Epiphany homepage-url 'about:blank'
+    gsettings set org.gnome.Epiphany start-in-incognito-mode true
+else
+    echo "GNOME Web absent, ignoré."
+fi
 
 ########################################
 # PTYXIS
@@ -173,50 +179,96 @@ gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
 # DASH TO DOCK
 ########################################
 
-echo "Configuration Dash-to-Dock"
+echo "Configuration Dock"
 
-# Activation
-gnome-extensions enable dash-to-dock@micxgx.gmail.com
+read -r -p "Installer Dash to Dock depuis GitHub ? (o/N): " choix
 
-# Position
-gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
+if [[ $choix =~ ^[oO]$ ]]; then
+    if ! command -v sassc &>/dev/null; then
+        echo "sassc manquant, lancez postinstall.sh d'abord. Dash to Dock ignoré."
+    else
+        git clone https://github.com/micheleg/dash-to-dock.git /tmp/dash-to-dock
+        cd /tmp/dash-to-dock || {
+            echo "Impossible d'accéder au dossier cloné"
+            cd /
+        }
 
-# Dock flottant
-gsettings set org.gnome.shell.extensions.dash-to-dock extend-height false
+        DEST="$HOME/.local/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com"
+        mkdir -p "$DEST"
 
-# Auto hide intelligent
-gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
-gsettings set org.gnome.shell.extensions.dash-to-dock autohide true
-gsettings set org.gnome.shell.extensions.dash-to-dock intellihide true
-gsettings set org.gnome.shell.extensions.dash-to-dock autohide-in-fullscreen true
+        if make DESTDIR="$HOME/.local"; then
+            glib-compile-schemas "$DEST/schemas/"
+            echo "Dash to Dock compilé avec succès."
+        else
+            echo "Erreur de compilation, Dash to Dock ignoré."
+        fi
 
-# Taille icônes
-gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 42
+        cd / || true
+        rm -rf /tmp/dash-to-dock
+    fi
+fi
+if gnome-extensions list | grep -q "dash-to-dock@micxgx.gmail.com"; then
+    gnome-extensions enable dash-to-dock@micxgx.gmail.com
 
-# Transparence
-gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode 'FIXED'
-gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.80
+    # Position
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
 
-# Coins arrondis
-gsettings set org.gnome.shell.extensions.dash-to-dock border-radius 18
+    # Dock flottant
+    gsettings set org.gnome.shell.extensions.dash-to-dock extend-height false
 
-# Clic = réduire
-gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
+    # Auto hide
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
+    gsettings set org.gnome.shell.extensions.dash-to-dock autohide false
+    gsettings set org.gnome.shell.extensions.dash-to-dock intellihide true
+    gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode 'MAXIMIZED_WINDOWS'
+    gsettings set org.gnome.shell.extensions.dash-to-dock autohide-in-fullscreen true
 
-# Désactivation overview au boot
-gsettings set org.gnome.shell.extensions.dash-to-dock disable-overview-on-startup true
+    # Taille icônes
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 42
 
-# Pas de trash/mounts
-gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
-gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false
+    # Transparence
+    gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode 'FIXED'
+    gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.80
 
+    # Coins arrondis
+    #gsettings set org.gnome.shell.extensions.dash-to-dock border-radius 18
+
+    # Clic = réduire
+    gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
+
+    # Désactivation overview au boot
+    gsettings set org.gnome.shell.extensions.dash-to-dock disable-overview-on-startup true
+
+    # Pas de trash/mounts
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false
+else
+    # Ubuntu Dock natif
+    gsettings set org.gnome.shell.extensions.ubuntu-dock autohide true
+    gsettings set org.gnome.shell.extensions.ubuntu-dock dock-fixed false
+    gsettings set org.gnome.shell.extensions.ubuntu-dock intellihide false
+    gsettings set org.gnome.shell.extensions.ubuntu-dock autohide-delay 0.0
+    gsettings set org.gnome.shell.extensions.ubuntu-dock show-delay 0.0
+fi
 ########################################
 # APPINDICATOR
 ########################################
-
 echo "Activation AppIndicator"
 
-gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
+if gnome-extensions list | grep -q "appindicatorsupport@rgcjonas.gmail.com"; then
+    gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com
+else
+    echo "AppIndicator absent, ignoré."
+fi
+
+########################################
+# TERRMINAL
+########################################
+gsettings set org.gnome.settings-daemon.plugins.media-keys terminal '[]'
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'WezTerm'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'wezterm'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Ctrl><Alt>t'
 
 ########################################
 # EXTENSIONS BONUS
