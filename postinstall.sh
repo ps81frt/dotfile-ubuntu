@@ -162,7 +162,7 @@ EOF
 sysctl -p
 
 print_info "Création des alias..."
-cat >>/etc/bash.bashrc <<'EOF'
+cat >>"/home/$SUDO_USER/.bashrc" <<'EOF'
 
 alias ll='ls -alF'
 alias la='ls -A'
