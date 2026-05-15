@@ -2,7 +2,7 @@
 # postinstall.sh - Script d'optimisation post-installation Ubuntu
 # A exécuter avec: sudo bash postinstall.sh
 
-set -e  # Stop le script en cas d'erreur
+set -e # Stop le script en cas d'erreur
 
 # Couleurs pour l'affichage
 RED='\033[0;31m'
@@ -24,8 +24,8 @@ print_error() {
 
 # Vérification des droits root
 if [[ $EUID -ne 0 ]]; then
-   print_error "Ce script doit être exécuté en tant que root (sudo)"
-   exit 1
+    print_error "Ce script doit être exécuté en tant que root (sudo)"
+    exit 1
 fi
 
 print_info "Début de la post-installation Ubuntu..."
@@ -44,7 +44,7 @@ apt install -y \
     net-tools nmap ufw fail2ban openssh-server rsync jq yq fzf \
     ripgrep fd-find bat exa duf p7zip-full p7zip-rar strace ltrace \
     lsof iotop nethogs iftop sqlite3 python3 python3-pip python3-venv
-    
+
 # Installation des Snap packages
 print_info "Installation des Snap packages..."
 snap install core
@@ -52,7 +52,7 @@ snap install micro --classic
 
 # Configuration VIM améliorée
 print_info "Configuration de VIM..."
-cat > /root/.vimrc << 'EOF'
+cat >/root/.vimrc <<'EOF'
 " Améliorations VIM
 set number
 set relativenumber
@@ -82,14 +82,14 @@ EOF
 
 # Copie de la config pour l'utilisateur courant (si non-root)
 if [ -n "$SUDO_USER" ]; then
-    cp /root/.vimrc /home/$SUDO_USER/.vimrc
-    chown $SUDO_USER:$SUDO_USER /home/$SUDO_USER/.vimrc
+    cp /root/.vimrc /home/"$SUDO_USER"/.vimrc
+    chown "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.vimrc
 fi
 
 # Configuration HTOP améliorée
 print_info "Configuration de HTOP..."
 mkdir -p /root/.config/htop
-cat > /root/.config/htop/htoprc << 'EOF'
+cat >/root/.config/htop/htoprc <<'EOF'
 # HTOP config
 fields=0 48 17 18 38 39 40 2 46 47 49 1
 sort_key=46
@@ -140,7 +140,7 @@ systemctl start fail2ban
 print_info "Optimisations système..."
 
 # Augmentation des limites système
-cat >> /etc/security/limits.conf << 'EOF'
+cat >>/etc/security/limits.conf <<'EOF'
 * soft nofile 65535
 * hard nofile 65535
 * soft nproc 65535
@@ -148,7 +148,7 @@ cat >> /etc/security/limits.conf << 'EOF'
 EOF
 
 # Optimisations réseau
-cat >> /etc/sysctl.conf << 'EOF'
+cat >>/etc/sysctl.conf <<'EOF'
 # Optimisations réseau
 net.core.somaxconn = 1024
 net.core.netdev_max_backlog = 5000
@@ -164,7 +164,7 @@ sysctl -p
 
 # Création d'alias utiles
 print_info "Création d'alias utiles..."
-cat >> /etc/bash.bashrc << 'EOF'
+cat >>/etc/bash.bashrc <<'EOF'
 
 # Aliases personnalisés
 alias ll='ls -alF'
