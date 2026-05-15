@@ -46,7 +46,7 @@ curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor -o /usr/share/keyring
 echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
 
 apt update
-apt install -y wezterm
+apt install -y wezterm-nightly
 
 WEZTERM_CONFIG_URL="https://raw.githubusercontent.com/ps81frt/dotfile-ubuntu/refs/heads/main/wezterm.lua"
 curl -fsSL "$WEZTERM_CONFIG_URL" -o /tmp/wezterm.lua
