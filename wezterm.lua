@@ -40,7 +40,7 @@ config.pane_focus_follows_mouse = true
 -- ⚡ PERF
 -- =========================
 config.enable_kitty_keyboard = true
-config.window_decorations = "TITLE|RESIZE"
+config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 
 config.initial_cols = 120
 config.initial_rows = 30
@@ -159,5 +159,21 @@ config.key_tables = {
 		},
 	},
 }
+
+-- =========================
+-- 🖱️ CLIC DROIT COPIER/COLLER
+-- =========================
+config.mouse_bindings = {
+	{
+		event = { Down = { streak = 1, button = "Right" } },
+		mods = "NONE",
+		action = wezterm.action.PasteFrom("Clipboard"),
+	},
+}
+
+-- =========================
+-- 🔗 LIENS CLIQUABLES
+-- =========================
+config.hyperlink_rules = wezterm.default_hyperlink_rules()
 
 return config
