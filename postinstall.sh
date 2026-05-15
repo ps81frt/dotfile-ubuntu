@@ -1,59 +1,70 @@
 #!/bin/bash
-# postinstall.sh - Script d'optimisation post-installation Ubuntu
-# A exécuter avec: sudo bash postinstall.sh
+# postinstall.sh - Script d'optimisation post-installation Debian/Ubuntu
 
-set -e # Stop le script en cas d'erreur
+set -e
 
-# Couleurs pour l'affichage
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 print_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
 
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Vérification des droits root
 if [[ $EUID -ne 0 ]]; then
-    print_error "Ce script doit être exécuté en tant que root (sudo)"
+    echo -e "${RED}[ERROR] Ce script doit être exécuté en tant que root (sudo)${NC}"
     exit 1
 fi
 
-print_info "Début de la post-installation Ubuntu..."
+print_info "Début de la post-installation..."
 
-# Mise à jour du système
-print_info "Mise à jour du système..."
 apt update && apt upgrade -y
 apt autoremove -y
 
-# Installation des paquets essentiels
-print_info "Installation des paquets essentiels..."
+print_info "Installation des paquets..."
 apt install -y \
     curl wget git build-essential software-properties-common \
     apt-transport-https ca-certificates gnupg lsb-release unzip zip \
     gzip tar vim nano neovim htop ncdu tree tmux screen \
-    net-tools nmap ufw fail2ban openssh-server rsync jq yq fzf \
+    net-tools nmap ufw fail2ban openssh-server rsync jq fzf \
     ripgrep fd-find bat exa duf p7zip-full p7zip-rar strace ltrace \
-    lsof iotop nethogs iftop sqlite3 python3 python3-pip python3-venv
-
-# Installation des Snap packages
-print_info "Installation des Snap packages..."
+    lsof iotop nethogs iftop sqlite3 python3 python3-pip python3-venv \
+    pastebinit neofetch unrar fakeroot devscripts \
+    libncurses-dev libelf-dev libssl-dev dwarves \
+    flex bison bc cpio kmod gawk openssl dkms \
+    libudev-dev libpci-dev libiberty-dev autoconf llvm \
+    zstd lzop u-boot-tools rsync sassc
 snap install core
 snap install micro --classic
 
-# Configuration VIM améliorée
-print_info "Configuration de VIM..."
+curl -fsSL https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Hack/Regular/HackNerdFontMono-Regular.ttf \
+    -o /usr/local/share/fonts/HackNerdFontMono-Regular.ttf
+fc-cache -fv
+
+curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
+echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
+
+apt update
+apt install -y wezterm
+
+WEZTERM_CONFIG_URL="https://raw.githubusercontent.com/ps81frt/dotfile-ubuntu/refs/heads/main/wezterm.lua"
+curl -fsSL "$WEZTERM_CONFIG_URL" -o /tmp/wezterm.lua
+
+mkdir -p /root/.config/wezterm
+cp /tmp/wezterm.lua /root/.config/wezterm/wezterm.lua
+
+while IFS=: read -r username _ uid _ _ homedir _; do
+    if [[ $uid -ge 1000 && $uid -lt 65534 && -d "$homedir" ]]; then
+        mkdir -p "$homedir/.config/wezterm"
+        cp /tmp/wezterm.lua "$homedir/.config/wezterm/wezterm.lua"
+        chown -R "$username":"$username" "$homedir/.config/wezterm"
+    fi
+done </etc/passwd
+
+rm -f /tmp/wezterm.lua
+
 cat >/root/.vimrc <<'EOF'
-" Améliorations VIM
 set number
 set relativenumber
 set tabstop=4
@@ -73,24 +84,19 @@ set incsearch
 set ignorecase
 set smartcase
 
-" Mapping pratiques
 nnoremap <space> :
 nnoremap <C-s> :w<CR>
 inoremap <C-s> <Esc>:w<CR>
 nnoremap <C-q> :q!<CR>
 EOF
 
-# Copie de la config pour l'utilisateur courant (si non-root)
 if [ -n "$SUDO_USER" ]; then
     cp /root/.vimrc /home/"$SUDO_USER"/.vimrc
     chown "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.vimrc
 fi
 
-# Configuration HTOP améliorée
-print_info "Configuration de HTOP..."
 mkdir -p /root/.config/htop
 cat >/root/.config/htop/htoprc <<'EOF'
-# HTOP config
 fields=0 48 17 18 38 39 40 2 46 47 49 1
 sort_key=46
 sort_direction=1
@@ -122,24 +128,19 @@ right_meters=RightCPUs2 Tasks LoadAverage Uptime
 right_meter_modes=1 2 2 2
 EOF
 
-# Configuration du firewall UFW
 print_info "Configuration du firewall..."
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow ssh
 ufw allow 80/tcp
 ufw allow 443/tcp
-# ufw enable # Décommenter pour activer
 
-# Configuration de fail2ban
 print_info "Configuration de fail2ban..."
 systemctl enable fail2ban
 systemctl start fail2ban
 
-# Optimisations système
 print_info "Optimisations système..."
 
-# Augmentation des limites système
 cat >>/etc/security/limits.conf <<'EOF'
 * soft nofile 65535
 * hard nofile 65535
@@ -147,9 +148,7 @@ cat >>/etc/security/limits.conf <<'EOF'
 * hard nproc 65535
 EOF
 
-# Optimisations réseau
 cat >>/etc/sysctl.conf <<'EOF'
-# Optimisations réseau
 net.core.somaxconn = 1024
 net.core.netdev_max_backlog = 5000
 net.ipv4.tcp_max_syn_backlog = 4096
@@ -162,17 +161,15 @@ EOF
 
 sysctl -p
 
-# Création d'alias utiles
-print_info "Création d'alias utiles..."
+print_info "Création des alias..."
 cat >>/etc/bash.bashrc <<'EOF'
 
-# Aliases personnalisés
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-alias update='sudo apt update && sudo apt upgrade -y'
-alias install='sudo apt install'
-alias remove='sudo apt remove'
+alias update='apt update && apt upgrade -y'
+alias install='apt install'
+alias remove='apt remove'
 alias search='apt search'
 alias ports='netstat -tulpn'
 alias meminfo='free -m -h'
@@ -188,9 +185,20 @@ alias grep='grep --color=auto'
 alias diff='colordiff'
 alias tree='tree -C'
 alias htop='htop -C'
-alias btop='btop'
+alias editp='gnome-text-editor'
+alias fetch='neofetch'
+alias cls='clear'
+alias v='nvim'
 
-# Améliorations des commandes
+histdel() {
+    history -c
+    history -w
+    rm -f ~/.bash_history
+    source ~/.bashrc
+}
+
+alias logout='gnome-session-quit --logout --no-prompt'
+
 if command -v bat &> /dev/null; then
     alias cat='bat'
 fi
@@ -206,11 +214,11 @@ if command -v duf &> /dev/null; then
     alias df='duf'
 fi
 
-# Fonctions utiles
 mkcd() {
     mkdir -p "$1" && cd "$1"
 }
-extract() {
+
+ex() {
     if [ -f $1 ]; then
         case $1 in
             *.tar.bz2) tar xjf $1 ;;
@@ -232,22 +240,39 @@ extract() {
 }
 EOF
 
-# Nettoyage final
+print_info "Correction des sources APT..."
+
+if [ -f /etc/apt/sources.list.d/canonical.sources ]; then
+    cat >/etc/apt/sources.list.d/canonical.sources <<'EOF'
+Types: deb
+URIs: http://archive.canonical.com/ubuntu/
+Suites: jammy
+Components: partner
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+EOF
+fi
+
+if [ -f /etc/apt/sources.list.d/wezterm.sources ] && [ -f /etc/apt/sources.list.d/wezterm.list ]; then
+    rm -f /etc/apt/sources.list.d/wezterm.list
+fi
+
+apt update
+
 print_info "Nettoyage..."
 apt autoclean
 apt autoremove --purge -y
 rm -rf /var/lib/apt/lists/*
 
-# Résumé
 print_info "Installation terminée !"
 echo -e "${GREEN}================================${NC}"
 echo -e "${GREEN}Paquets installés :${NC}"
 echo -e "${YELLOW}• VIM + Neovim${NC}"
-echo -e "${YELLOW}• HTOP + BTOP${NC}"
+echo -e "${YELLOW}• HTOP${NC}"
 echo -e "${YELLOW}• Git, Curl, Wget${NC}"
 echo -e "${YELLOW}• Build essential${NC}"
 echo -e "${YELLOW}• Outils réseau et sécurité${NC}"
 echo -e "${YELLOW}• Utilitaires système${NC}"
+echo -e "${YELLOW}• Pastebinit + Neofetch${NC}"
 echo ""
 echo -e "${GREEN}Optimisations :${NC}"
 echo -e "${YELLOW}• Configuration VIM${NC}"
@@ -259,8 +284,6 @@ echo ""
 echo -e "${GREEN}Recommandations :${NC}"
 echo -e "${YELLOW}• Redémarrez votre session pour profiter des alias${NC}"
 echo -e "${YELLOW}• Activez le firewall: sudo ufw enable${NC}"
-echo -e "${YELLOW}• Essayez 'btop' pour un meilleur HTOP${NC}"
-echo -e "${YELLOW}• Testez 'bat', 'exa', 'duf' comme alternatives modernes${NC}"
 echo -e "${GREEN}================================${NC}"
 
 print_info "Post-installation terminée avec succès !"
