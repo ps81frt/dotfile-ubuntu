@@ -63,6 +63,13 @@ gsettings set org.gnome.desktop.privacy remove-old-trash-files true
 gsettings set org.gnome.desktop.privacy old-files-age 30
 
 ########################################
+# RACCOURCI ALWAYS ON TOP
+########################################
+
+# Raccourci clavier Windows t
+gsettings set org.gnome.desktop.wm.keybindings always-on-top "['<Super>t']"
+
+########################################
 # CONFIDENTIALITÉ
 ########################################
 
