@@ -28,9 +28,9 @@ apt install -y \
     apt-transport-https ca-certificates gnupg lsb-release unzip zip \
     gzip tar vim nano neovim htop ncdu tree tmux screen \
     net-tools nmap ufw fail2ban openssh-server rsync jq fzf \
-    ripgrep fd-find bat exa duf p7zip-full p7zip-rar strace ltrace \
+    ripgrep fd-find bat duf p7zip-full strace ltrace \
     lsof iotop nethogs iftop sqlite3 python3 python3-pip python3-venv \
-    pastebinit neofetch unrar fakeroot devscripts \
+    pastebinit fastfetch unrar fakeroot devscripts \
     libncurses-dev libelf-dev libssl-dev dwarves \
     flex bison bc cpio kmod gawk openssl dkms \
     libudev-dev libpci-dev libiberty-dev autoconf llvm \
@@ -186,7 +186,7 @@ alias diff='colordiff'
 alias tree='tree -C'
 alias htop='htop -C'
 alias editp='gnome-text-editor'
-alias fetch='neofetch'
+alias fetch='fastfetch'
 alias cls='clear'
 alias v='nvim'
 
@@ -272,7 +272,7 @@ echo -e "${YELLOW}• Git, Curl, Wget${NC}"
 echo -e "${YELLOW}• Build essential${NC}"
 echo -e "${YELLOW}• Outils réseau et sécurité${NC}"
 echo -e "${YELLOW}• Utilitaires système${NC}"
-echo -e "${YELLOW}• Pastebinit + Neofetch${NC}"
+echo -e "${YELLOW}• Pastebinit + fastfetch${NC}"
 echo ""
 echo -e "${GREEN}Optimisations :${NC}"
 echo -e "${YELLOW}• Configuration VIM${NC}"
