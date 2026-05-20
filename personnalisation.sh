@@ -185,70 +185,79 @@ gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
 ########################################
 # DASH TO DOCK
 ########################################
-
 echo "Configuration Dock"
-
+DEST="$HOME/.local/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com"
 read -r -p "Installer Dash to Dock depuis GitHub ? (o/N): " choix
-
 if [[ $choix =~ ^[oO]$ ]]; then
     if ! command -v sassc &>/dev/null; then
         echo "sassc manquant, lancez postinstall.sh d'abord. Dash to Dock ignoré."
     else
+        rm -rf /tmp/dash-to-dock /tmp/dtd-build
         git clone https://github.com/micheleg/dash-to-dock.git /tmp/dash-to-dock
         cd /tmp/dash-to-dock || {
             echo "Impossible d'accéder au dossier cloné"
             cd /
         }
-
-        DEST="$HOME/.local/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com"
-        mkdir -p "$DEST"
-
-        if make DESTDIR="$HOME/.local"; then
-            glib-compile-schemas "$DEST/schemas/"
-            echo "Dash to Dock compilé avec succès."
+        make DESTDIR=/tmp/dtd-build install 2>&1 | tail -3
+        BUILT=$(find /tmp/dtd-build -type d -name "dash-to-dock@micxgx.gmail.com" 2>/dev/null | head -1)
+        if [ -n "$BUILT" ]; then
+            mkdir -p "$DEST"
+            cp -r "$BUILT/." "$DEST/"
+            if [ -d "$DEST/schemas" ]; then
+                glib-compile-schemas "$DEST/schemas/"
+                echo "Dash to Dock compilé avec succès."
+            fi
         else
             echo "Erreur de compilation, Dash to Dock ignoré."
         fi
-
         cd / || true
-        rm -rf /tmp/dash-to-dock
+        rm -rf /tmp/dash-to-dock /tmp/dtd-build
     fi
 fi
-if gnome-extensions list | grep -q "dash-to-dock@micxgx.gmail.com"; then
-    gnome-extensions enable dash-to-dock@micxgx.gmail.com
-
+if [ -d "$DEST" ] && [ -f "$DEST/metadata.json" ]; then
+    gdbus call --session \
+        --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell \
+        --method org.gnome.Shell.Extensions.EnableExtension \
+        "dash-to-dock@micxgx.gmail.com" 2>/dev/null && \
+        echo "Dash to Dock activé." || \
+        echo "Déconnectez/reconnectez puis : gnome-extensions enable dash-to-dock@micxgx.gmail.com"
     # Position
     gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
-
     # Dock flottant
     gsettings set org.gnome.shell.extensions.dash-to-dock extend-height false
-
     # Auto hide
     gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
     gsettings set org.gnome.shell.extensions.dash-to-dock autohide false
     gsettings set org.gnome.shell.extensions.dash-to-dock intellihide true
     gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode 'MAXIMIZED_WINDOWS'
     gsettings set org.gnome.shell.extensions.dash-to-dock autohide-in-fullscreen true
-
     # Taille icônes
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 42
-
     # Transparence
     gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode 'FIXED'
     gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.80
-
     # Coins arrondis
     #gsettings set org.gnome.shell.extensions.dash-to-dock border-radius 18
-
     # Clic = réduire
     gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
-
     # Désactivation overview au boot
     gsettings set org.gnome.shell.extensions.dash-to-dock disable-overview-on-startup true
-
     # Pas de trash/mounts
     gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
     gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false
+    # Autostart one-shot pour réappliquer après reconnexion
+    mkdir -p "$HOME/.config/autostart"
+    cat > "$HOME/.config/autostart/dash-to-dock-config.desktop" << 'AUTOSTART'
+[Desktop Entry]
+Type=Application
+Name=Dash to Dock Config
+Exec=bash -c 'sleep 5 && gsettings set org.gnome.shell.extensions.dash-to-dock dock-position BOTTOM && gsettings set org.gnome.shell.extensions.dash-to-dock extend-height false && gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false && gsettings set org.gnome.shell.extensions.dash-to-dock autohide false && gsettings set org.gnome.shell.extensions.dash-to-dock intellihide true && gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode MAXIMIZED_WINDOWS && gsettings set org.gnome.shell.extensions.dash-to-dock autohide-in-fullscreen true && gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 42 && gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode FIXED && gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.80 && gsettings set org.gnome.shell.extensions.dash-to-dock click-action minimize && gsettings set org.gnome.shell.extensions.dash-to-dock disable-overview-on-startup true && gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false && gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false && rm -f ${HOME}/.config/autostart/dash-to-dock-config.desktop'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+AUTOSTART
+    echo "Config dock planifiée au prochain démarrage de session."
 else
     # Ubuntu Dock natif
     gsettings set org.gnome.shell.extensions.ubuntu-dock autohide true
@@ -257,6 +266,7 @@ else
     gsettings set org.gnome.shell.extensions.ubuntu-dock autohide-delay 0.0
     gsettings set org.gnome.shell.extensions.ubuntu-dock show-delay 0.0
 fi
+
 ########################################
 # APPINDICATOR
 ########################################
