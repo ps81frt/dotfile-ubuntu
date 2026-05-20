@@ -40,9 +40,10 @@ config.pane_focus_follows_mouse = true
 -- ⚡ PERF
 -- =========================
 config.enable_kitty_keyboard = true
----config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 ---config.window_decorations = "RESIZE"
-config.window_decorations = "TITLE|RESIZE"
+---config.window_decorations = "TITLE|RESIZE"
+config.integrated_title_buttons = { "Hide", "Maximize", "Close" }
 
 config.initial_cols = 120
 config.initial_rows = 30
