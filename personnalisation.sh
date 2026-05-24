@@ -192,6 +192,11 @@ if [[ $choix =~ ^[oO]$ ]]; then
     if ! command -v sassc &>/dev/null; then
         echo "sassc manquant, lancez postinstall.sh d'abord. Dash to Dock ignoré."
     else
+        if [ -d "$DEST" ]; then
+            echo "Suppression de l'ancienne installation de Dash to Dock..."
+            gnome-extensions disable dash-to-dock@micxgx.gmail.com 2>/dev/null || true
+            rm -rf "$DEST"
+        fi
         rm -rf /tmp/dash-to-dock /tmp/dtd-build
         git clone https://github.com/micheleg/dash-to-dock.git /tmp/dash-to-dock
         cd /tmp/dash-to-dock || {
