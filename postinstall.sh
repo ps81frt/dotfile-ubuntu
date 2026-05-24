@@ -38,6 +38,13 @@ apt install -y \
 snap install core
 snap install micro --classic
 
+sudo apt install libarchive-tools
+bash
+
+sudo mkdir -p /usr/local/share/fonts/redhat
+curl -fsSL https://github.com/RedHatOfficial/RedHatFont/archive/refs/tags/5.0.0.zip
+sudo bsdtar -xvf- -C /usr/local/share/fonts/redhat/ --include="*.ttf" --include="*.otf" --strip-components=3
+
 curl -fsSL https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Hack/Regular/HackNerdFontMono-Regular.ttf \
     -o /usr/local/share/fonts/HackNerdFontMono-Regular.ttf
 fc-cache -fv
