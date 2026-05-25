@@ -56,44 +56,17 @@ fc-cache -fv
 
 #apt update
 #apt install -y wezterm-nightly
-get_wezterm_suite() {
-    local suite
-    suite=$(lsb_release -cs 2>/dev/null)
+print_info "Installation de WezTerm (dépôt officiel)..."
 
-    if curl -fsSL "https://wezterm.io/apt/dists/$suite/Release" &>/dev/null; then
-        echo "$suite"
-    else
-        local distro
-        distro=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
-        case "$distro" in
-            ubuntu)
-                case "$suite" in
-                    resolute) echo "resolute" ;;  # Ubuntu 26.04
-                    noble)    echo "noble" ;;    # Ubuntu 24.04
-                    jammy)    echo "jammy" ;;    # Ubuntu 22.04
-                    *)        echo "noble" ;;    # Default récent
-                esac
-                ;;
-            debian)
-                case "$suite" in
-                    bookworm) echo "bookworm" ;;
-                    bullseye) echo "bullseye" ;;
-                    *)        echo "bookworm" ;;
-                esac
-                ;;
-            *) echo "noble" ;;
-        esac
-    fi
-}
+rm -f /etc/apt/sources.list.d/wezterm.list /usr/share/keyrings/wezterm-fury.gpg
 
-WEZTERM_SUITE=$(get_wezterm_suite)
-print_info "WezTerm suite détectée : $WEZTERM_SUITE"
+curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
+echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' > /etc/apt/sources.list.d/wezterm.list
+chmod 644 /usr/share/keyrings/wezterm-fury.gpg
 
-curl -fsSL https://wezterm.io/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm.gpg
-echo "deb [signed-by=/usr/share/keyrings/wezterm.gpg] https://wezterm.io/apt $WEZTERM_SUITE main" > /etc/apt/sources.list.d/wezterm.list
-
+# Installe WezTerm
 apt update
-apt install -y wezterm
+apt install -y wezterm-nightly
 
 WEZTERM_CONFIG_URL="https://raw.githubusercontent.com/ps81frt/dotfile-ubuntu/refs/heads/main/wezterm.lua"
 curl -fsSL "$WEZTERM_CONFIG_URL" -o /tmp/wezterm.lua
