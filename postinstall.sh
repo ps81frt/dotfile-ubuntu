@@ -2,6 +2,7 @@
 # postinstall.sh - Script d'optimisation post-installation Debian/Ubuntu
 
 set -e
+set -o pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -38,17 +39,46 @@ apt install -y \
 snap install core
 snap install micro --classic
 
-sudo apt install libarchive-tools
-sudo mkdir -p /usr/local/share/fonts/redhat
-curl -fsSL https://github.com/RedHatOfficial/RedHatFont/archive/refs/tags/5.0.0.zip
-sudo bsdtar -xvf- -C /usr/local/share/fonts/redhat/ --include="*.ttf" --include="*.otf" --strip-components=3
+apt install libarchive-tools
+mkdir -p /usr/local/share/fonts/redhat
+#curl -fsSL https://github.com/RedHatOfficial/RedHatFont/archive/refs/tags/5.0.0.zip
+#sudo bsdtar -xvf- -C /usr/local/share/fonts/redhat/ --include="*.ttf" --include="*.otf" --strip-components=3
+curl -fsSL https://github.com/RedHatOfficial/RedHatFont/archive/refs/tags/5.0.0.zip -o /tmp/redhat-font.zip
+bsdtar -xvf /tmp/redhat-font.zip -C /usr/local/share/fonts/redhat/ --include="*.ttf" --include="*.otf" --strip-components=3
+rm -f /tmp/redhat-font.zip
 
 curl -fsSL https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Hack/Regular/HackNerdFontMono-Regular.ttf \
     -o /usr/local/share/fonts/HackNerdFontMono-Regular.ttf
 fc-cache -fv
 
+#curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
+#echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
+
+#apt update
+#apt install -y wezterm-nightly
+get_wezterm_suite() {
+    local suite
+    suite=$(lsb_release -cs 2>/dev/null)
+    
+    if curl -fsSL "https://apt.fury.io/wez/dists/$suite/Release" &>/dev/null; then
+        echo "$suite"
+    else
+        local distro
+        distro=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+        case "$distro" in
+            ubuntu) echo "jammy" ;;
+            debian) echo "bullseye" ;;
+            *)      echo "jammy" ;;
+        esac
+    fi
+}
+
+WEZTERM_SUITE=$(get_wezterm_suite)
+print_info "WezTerm suite détectée : $WEZTERM_SUITE"
+
 curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
-echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
+echo "deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ $WEZTERM_SUITE main" \
+    >/etc/apt/sources.list.d/wezterm.list
 
 apt update
 apt install -y wezterm-nightly
