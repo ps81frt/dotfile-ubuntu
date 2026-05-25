@@ -59,16 +59,29 @@ fc-cache -fv
 get_wezterm_suite() {
     local suite
     suite=$(lsb_release -cs 2>/dev/null)
-    
-    if curl -fsSL "https://apt.fury.io/wez/dists/$suite/Release" &>/dev/null; then
+
+    if curl -fsSL "https://wezterm.io/apt/dists/$suite/Release" &>/dev/null; then
         echo "$suite"
     else
         local distro
         distro=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
         case "$distro" in
-            ubuntu) echo "jammy" ;;
-            debian) echo "bullseye" ;;
-            *)      echo "jammy" ;;
+            ubuntu)
+                case "$suite" in
+                    resolute) echo "resolute" ;;  # Ubuntu 26.04
+                    noble)    echo "noble" ;;    # Ubuntu 24.04
+                    jammy)    echo "jammy" ;;    # Ubuntu 22.04
+                    *)        echo "noble" ;;    # Default récent
+                esac
+                ;;
+            debian)
+                case "$suite" in
+                    bookworm) echo "bookworm" ;;
+                    bullseye) echo "bullseye" ;;
+                    *)        echo "bookworm" ;;
+                esac
+                ;;
+            *) echo "noble" ;;
         esac
     fi
 }
@@ -76,12 +89,11 @@ get_wezterm_suite() {
 WEZTERM_SUITE=$(get_wezterm_suite)
 print_info "WezTerm suite détectée : $WEZTERM_SUITE"
 
-curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
-echo "deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ $WEZTERM_SUITE main" \
-    >/etc/apt/sources.list.d/wezterm.list
+curl -fsSL https://wezterm.io/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm.gpg
+echo "deb [signed-by=/usr/share/keyrings/wezterm.gpg] https://wezterm.io/apt $WEZTERM_SUITE main" > /etc/apt/sources.list.d/wezterm.list
 
 apt update
-apt install -y wezterm-nightly
+apt install -y wezterm
 
 WEZTERM_CONFIG_URL="https://raw.githubusercontent.com/ps81frt/dotfile-ubuntu/refs/heads/main/wezterm.lua"
 curl -fsSL "$WEZTERM_CONFIG_URL" -o /tmp/wezterm.lua
