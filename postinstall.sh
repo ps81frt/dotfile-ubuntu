@@ -83,7 +83,12 @@ while IFS=: read -r username _ uid _ _ homedir _; do
 done </etc/passwd
 
 rm -f /tmp/wezterm.lua
+mkdir -p ~/.config/wezterm/colors
+curl -Lo ~/.config/wezterm/colors/nightfox.toml https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/wezterm/Nightfox.toml
+sed -i 's#config.color_scheme = "Gruvbox dark, medium (base16)"#---config.color_scheme = "Gruvbox dark, medium (base16)"#' ~/.config/wezterm/wezterm.lua
+sed -i '/---config.color_scheme = "Gruvbox dark, medium (base16)"/a config.color_scheme = "nightfox"' ~/.config/wezterm/wezterm.lua
 
+echo "config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua
 cat >/root/.vimrc <<'EOF'
 set number
 set relativenumber
