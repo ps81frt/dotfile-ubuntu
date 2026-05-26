@@ -88,7 +88,7 @@ curl -Lo ~/.config/wezterm/colors/nightfox.toml https://raw.githubusercontent.co
 sed -i 's#config.color_scheme = "Gruvbox dark, medium (base16)"#---config.color_scheme = "Gruvbox dark, medium (base16)"#' ~/.config/wezterm/wezterm.lua
 sed -i '/---config.color_scheme = "Gruvbox dark, medium (base16)"/a config.color_scheme = "nightfox"' ~/.config/wezterm/wezterm.lua
 
-echo "config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua
+echo "config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua"
 cat >/root/.vimrc <<'EOF'
 set number
 set relativenumber
