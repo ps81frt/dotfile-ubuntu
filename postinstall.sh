@@ -83,10 +83,21 @@ while IFS=: read -r username _ uid _ _ homedir _; do
 done </etc/passwd
 
 rm -f /tmp/wezterm.lua
-mkdir -p ~/.config/wezterm/colors
-curl -Lo ~/.config/wezterm/colors/nightfox.toml https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/wezterm/Nightfox.toml
-sed -i 's#config.color_scheme = "Gruvbox dark, medium (base16)"#---config.color_scheme = "Gruvbox dark, medium (base16)"#' ~/.config/wezterm/wezterm.lua
-sed -i '/---config.color_scheme = "Gruvbox dark, medium (base16)"/a config.color_scheme = "nightfox"' ~/.config/wezterm/wezterm.lua
+
+if [ -n "$SUDO_USER" ]; then
+    USER_HOME=$(eval echo "~$SUDO_USER")
+
+    mkdir -p "$USER_HOME/.config/wezterm/colors"
+
+    curl -Lo "$USER_HOME/.config/wezterm/colors/nightfox.toml" \
+    https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/wezterm/Nightfox.toml
+
+    sed -i 's#config.color_scheme = "Gruvbox dark, medium (base16)"#---config.color_scheme = "Gruvbox dark, medium (base16)"#' \
+    "$USER_HOME/.config/wezterm/wezterm.lua"
+
+    sed -i '/---config.color_scheme = "Gruvbox dark, medium (base16)"/a config.color_scheme = "nightfox"' \
+    "$USER_HOME/.config/wezterm/wezterm.lua"
+fi
 
 echo "config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua"
 cat >/root/.vimrc <<'EOF'
