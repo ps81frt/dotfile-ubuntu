@@ -24,11 +24,11 @@ run() {
 
 ROOT_SCRIPTS=(
     "Post-installation (admin)|postinstall.sh"
+    "Neovim & Tmux|nvim_tmux_setup.sh"
 )
 
 USER_SCRIPTS=(
     "Personnalisation GNOME|personnalisation.sh"
-    "Neovim & Tmux|nvim_tmux_setup.sh"
     "Fix LSP Server|fix-lsp-server.sh"
 )
 
