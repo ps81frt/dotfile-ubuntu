@@ -37,6 +37,7 @@ apt install -y \
     libudev-dev libpci-dev libiberty-dev autoconf llvm \
     zstd lzop u-boot-tools rsync sassc
 snap install core
+snap refresh
 snap install micro --classic
 
 apt install libarchive-tools
@@ -61,7 +62,7 @@ print_info "Installation de WezTerm (dépôt officiel)..."
 rm -f /etc/apt/sources.list.d/wezterm.list /usr/share/keyrings/wezterm-fury.gpg
 
 curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
-echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' > /etc/apt/sources.list.d/wezterm.list
+echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
 chmod 644 /usr/share/keyrings/wezterm-fury.gpg
 
 # Installe WezTerm
@@ -90,13 +91,13 @@ if [ -n "$SUDO_USER" ]; then
     mkdir -p "$USER_HOME/.config/wezterm/colors"
 
     curl -Lo "$USER_HOME/.config/wezterm/colors/nightfox.toml" \
-    https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/wezterm/Nightfox.toml
+        https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/wezterm/Nightfox.toml
 
     sed -i 's#config.color_scheme = "Gruvbox dark, medium (base16)"#---config.color_scheme = "Gruvbox dark, medium (base16)"#' \
-    "$USER_HOME/.config/wezterm/wezterm.lua"
+        "$USER_HOME/.config/wezterm/wezterm.lua"
 
     sed -i '/---config.color_scheme = "Gruvbox dark, medium (base16)"/a config.color_scheme = "nightfox"' \
-    "$USER_HOME/.config/wezterm/wezterm.lua"
+        "$USER_HOME/.config/wezterm/wezterm.lua"
 fi
 
 sed -i '/config.font = wezterm.font_with_fallback/,/})/c\
@@ -172,19 +173,39 @@ right_meter_modes=1 2 2 2
 EOF
 
 print_info "Configuration du firewall..."
+
 ufw default deny incoming
 ufw default allow outgoing
+
 ufw allow ssh
 ufw allow 80/tcp
 ufw allow 443/tcp
 
-print_info "Configuration de fail2ban..."
+ufw --force enable
+ufw reload
+
+print_info "Configuration de fail2ban (SSH)..."
+
+install -d /etc/fail2ban/jail.d
+
+cat >/etc/fail2ban/jail.d/sshd.local <<'EOF'
+[sshd]                     # Jail SSH (protection des connexions SSH)
+enabled = true            # Active la protection fail2ban pour SSH
+backend = systemd         # Utilise systemd pour lire les logs
+port = ssh                # Surveille le port SSH (22 par défaut)
+maxretry = 10             # 10 tentatives échouées avant bannissement
+findtime = 10m            # Fenêtre de 10 minutes pour compter les échecs
+bantime = 10m             # Bannissement de 10 minutes après dépassement
+bantime.increment = true  # Augmente le temps de ban si récidive
+ignoreip = 127.0.0.1/8    # Ignore localhost (jamais banni)
+EOF
+
 systemctl enable fail2ban
-systemctl start fail2ban
+systemctl restart fail2ban
 
 print_info "Optimisations système..."
 
-cat >>/etc/security/limits.conf <<'EOF'
+cat >/etc/security/limits.conf <<'EOF'
 * soft nofile 65535
 * hard nofile 65535
 * soft nproc 65535
@@ -202,7 +223,7 @@ net.ipv4.tcp_syncookies = 1
 net.ipv4.ip_forward = 1
 EOF
 
-sysctl -p
+sysctl --system
 
 print_info "Création des alias..."
 cat >>"/home/$SUDO_USER/.bashrc" <<'EOF'
@@ -314,19 +335,31 @@ echo -e "${YELLOW}• HTOP${NC}"
 echo -e "${YELLOW}• Git, Curl, Wget${NC}"
 echo -e "${YELLOW}• Build essential${NC}"
 echo -e "${YELLOW}• Outils réseau et sécurité${NC}"
-echo -e "${YELLOW}• Utilitaires système${NC}"
+echo -e "${YELLOW}• SSH Server (openssh-server)${NC}"
+echo -e "${YELLOW}• Utilitaires système (tree, ncdu, tmux, screen)${NC}"
 echo -e "${YELLOW}• Pastebinit + fastfetch${NC}"
+echo ""
+echo -e "${GREEN}Configs installées :${NC}"
+echo -e "${YELLOW}• Fail2ban: /etc/fail2ban/jail.d/sshd.local${NC}"
+echo -e "${YELLOW}• Sysctl: /etc/sysctl.conf + sysctl --system${NC}"
+echo -e "${YELLOW}• Limits: /etc/security/limits.conf${NC}"
+echo -e "${YELLOW}• Bash aliases: /home/\$SUDO_USER/.bashrc${NC}"
+echo -e "${YELLOW}• Vim config: /root/.vimrc + user copy${NC}"
+echo -e "${YELLOW}• WezTerm config: /root/.config/wezterm/ + user sync${NC}"
+echo -e "${YELLOW}• Fonts: /usr/local/share/fonts/${NC}"
+echo ""
+echo -e "${GREEN}Services actifs :${NC}"
+echo -e "${YELLOW}• UFW Firewall (ports 22/80/443)${NC}"
+echo -e "${YELLOW}• Fail2ban SSH protection${NC}"
+echo -e "${YELLOW}• OpenSSH server${NC}"
 echo ""
 echo -e "${GREEN}Optimisations :${NC}"
 echo -e "${YELLOW}• Configuration VIM${NC}"
 echo -e "${YELLOW}• Configuration HTOP${NC}"
-echo -e "${YELLOW}• Limites système augmentées${NC}"
-echo -e "${YELLOW}• Optimisations réseau${NC}"
-echo -e "${YELLOW}• Aliases bash pratiques${NC}"
+echo -e "${YELLOW}• Limites système augmentées (ulimits)${NC}"
+echo -e "${YELLOW}• Optimisations réseau (TCP/sysctl)${NC}"
 echo ""
 echo -e "${GREEN}Recommandations :${NC}"
-echo -e "${YELLOW}• Redémarrez votre session pour profiter des alias${NC}"
-echo -e "${YELLOW}• Activez le firewall: sudo ufw enable${NC}"
+echo -e "${YELLOW}• Reconnect session ou reboot si alias non chargés${NC}"
 echo -e "${GREEN}================================${NC}"
-
 print_info "Post-installation terminée avec succès !"
