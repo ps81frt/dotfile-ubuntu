@@ -106,7 +106,7 @@ config.font = wezterm.font_with_fallback({\
     "JetBrains Mono",\
 })' "$USER_HOME/.config/wezterm/wezterm.lua"
 
-echo "config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua"
+echo 'config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua'
 cat >/root/.vimrc <<'EOF'
 set number
 set relativenumber
