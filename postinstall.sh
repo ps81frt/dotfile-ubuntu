@@ -99,6 +99,13 @@ if [ -n "$SUDO_USER" ]; then
     "$USER_HOME/.config/wezterm/wezterm.lua"
 fi
 
+sed -i '/config.font = wezterm.font_with_fallback/,/})/c\
+config.font = wezterm.font_with_fallback({\
+    "Red Hat Mono",\
+    "Hack Nerd Font Mono",\
+    "JetBrains Mono",\
+})' "$USER_HOME/.config/wezterm/wezterm.lua"
+
 echo "config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua"
 cat >/root/.vimrc <<'EOF'
 set number
