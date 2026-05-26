@@ -29,7 +29,7 @@ ROOT_SCRIPTS=(
 
 USER_SCRIPTS=(
     "Personnalisation GNOME|personnalisation.sh"
-    "Fix LSP Server|fix-lsp-server.sh"
+    "Fix LSP Server|fix-lsp-server-ubuntu.sh"
 )
 
 if [ "$EUID" -eq 0 ] && [ "${1:-}" != "user" ]; then
