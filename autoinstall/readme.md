@@ -1,3 +1,8 @@
+# Penser a modifier les variable dans generate.sh
+
+mot de passe
+disque taille ect...
+
 # Suivre évolution de l'installation
 
 # Ouvrir 2 terminal
