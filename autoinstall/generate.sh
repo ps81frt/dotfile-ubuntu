@@ -26,7 +26,7 @@ LVM_LV_SWAP="lv-swap"     # nom du Logical Volume swap
 LVM_LV_ROOT="lv-root"     # nom du Logical Volume /
 LVM_LV_HOME="lv-home"     # nom du Logical Volume /home
 
-FS_EFI="fat32"             # filesystem EFI (fat32 obligatoire UEFI)
+FS_EFI="vfat"             # filesystem EFI (fat32 obligatoire UEFI)
 FS_BOOT="ext4"             # filesystem /boot
 FS_ROOT="ext4"             # filesystem /
 FS_HOME="ext4"             # filesystem /home
@@ -98,7 +98,9 @@ autoinstall:
 
   network:
     ethernets:
-      eth0:
+      any-eth:
+        match:
+          name: "e*"
         dhcp4: true
     version: 2
 
