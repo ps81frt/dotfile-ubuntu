@@ -222,7 +222,6 @@ autoinstall:
     flavor: ${KERNEL_FLAVOR}
 
   late-commands:
-      - curtin in-target -- dhclient -v
       - curtin in-target -- add-apt-repository universe -y
       - curtin in-target -- add-apt-repository multiverse -y
       - curtin in-target -- add-apt-repository restricted -y
@@ -279,7 +278,6 @@ autoinstall:
         motd-news-config lxd-agent-loader
         landscape-common
       - curtin in-target -- apt-get autoremove -y
-      - curtin in-target -- systemctl disable systemd-networkd
 
 
   updates: ${AUTO_UPDATES}
