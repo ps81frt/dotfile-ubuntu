@@ -278,6 +278,7 @@ autoinstall:
         motd-news-config lxd-agent-loader
         landscape-common
       - curtin in-target -- apt-get autoremove -y
+      - curtin in-target -- systemctl disable systemd-networkd
 
   updates: ${AUTO_UPDATES}
 
