@@ -265,10 +265,13 @@ fi
 USER_HOME=$(eval echo "~${SUDO_USER:-root}")
 BASHRC="$USER_HOME/.bashrc"
 
-if ! grep -q "alias ll='ls -alF'" "$BASHRC"; then
+if ! grep -q "PS1_CONF_SET" "$BASHRC"; then
     cat >>"$BASHRC" <<'EOF'
 
-PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+# PS1_CONF_SET
+if [ "$USER" = "root" ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+fi
 export PS1
 
 alias ll='ls -alF'
@@ -306,50 +309,26 @@ histdel() {
 
 alias logout='gnome-session-quit --logout --no-prompt'
 
-if command -v bat &> /dev/null; then
-    alias cat='bat'
-fi
-
+if command -v bat &> /dev/null; then alias cat='bat'; fi
 if command -v exa &> /dev/null; then
-    alias ls='exa --icons'
-    alias ll='exa -l --icons'
-    alias la='exa -la --icons'
-    alias tree='exa --tree --icons'
+    alias ls='exa --icons'; alias ll='exa -l --icons'; alias la='exa -la --icons'; alias tree='exa --tree --icons'
 fi
+if command -v duf &> /dev/null; then alias df='duf'; fi
 
-if command -v duf &> /dev/null; then
-    alias df='duf'
-fi
-
-mkcd() {
-    mkdir -p "$1" && cd "$1"
-}
+mkcd() { mkdir -p "$1" && cd "$1"; }
 
 ex() {
     if [ -f $1 ]; then
         case $1 in
-            *.tar.bz2) tar xjf $1 ;;
-            *.tar.gz) tar xzf $1 ;;
-            *.bz2) bunzip2 $1 ;;
-            *.rar) unrar e $1 ;;
-            *.gz) gunzip $1 ;;
-            *.tar) tar xf $1 ;;
-            *.tbz2) tar xjf $1 ;;
-            *.tgz) tar xzf $1 ;;
-            *.zip) unzip $1 ;;
-            *.Z) uncompress $1 ;;
-            *.7z) 7z x $1 ;;
-            *) echo "'$1' ne peut pas être extrait" ;;
+            *.tar.bz2) tar xjf $1 ;; *.tar.gz) tar xzf $1 ;; *.bz2) bunzip2 $1 ;;
+            *.rar) unrar e $1 ;; *.gz) gunzip $1 ;; *.tar) tar xf $1 ;;
+            *.tbz2) tar xjf $1 ;; *.tgz) tar xzf $1 ;; *.zip) unzip $1 ;;
+            *.Z) uncompress $1 ;; *.7z) 7z x $1 ;; *) echo "'$1' invalide" ;;
         esac
-    else
-        echo "'$1' n'est pas un fichier valide"
-    fi
+    else echo "'$1' invalide"; fi
 }
 EOF
     chown "${SUDO_USER:-root}:${SUDO_USER:-root}" "$BASHRC"
-    print_info "Alias et configuration couleur ajoutés avec succès."
-else
-    print_info "Les alias existent déjà, pas d'ajout effectué."
 fi
 
 print_info "Correction des sources APT..."
