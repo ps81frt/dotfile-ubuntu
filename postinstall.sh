@@ -32,7 +32,7 @@ apt-get install -y \
     dwarves pahole debhelper ccache mold \
     neovim nano tmux screen btop rsync cpio kmod file jq \
     ripgrep fd-find bat \
-    tar gzip bzip2 xz-utils zstd lz4 lzop p7zip-full p7zip-rar rar unrar \
+    tar gzip bzip2 xz-utils zstd lz4 lzop p7zip-full rar unrar \
     openssh-client openssh-server iputils-ping \
     python3 python3-pip python3-venv \
     ca-certificates gnupg lsb-release software-properties-common apt-transport-https \
