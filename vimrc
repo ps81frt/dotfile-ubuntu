@@ -16,9 +16,6 @@ set hlsearch
 set incsearch
 set ignorecase
 set smartcase
-set hidden                 
-set wildmenu               
-set showcmd                
 set hidden
 set wildmenu
 set showcmd
