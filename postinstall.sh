@@ -171,7 +171,9 @@ else
 fi
 
 mkdir -p /root/.config/htop
-cat >/root/.config/htop/htoprc <<'EOF'
+if [ ! -f "/root/.config/htop/htoprc" ]; then
+    mkdir -p /root/.config/htop
+    cat >/root/.config/htop/htoprc <<'EOF'
 fields=0 48 17 18 38 39 40 2 46 47 49 1
 sort_key=46
 sort_direction=1
@@ -202,7 +204,7 @@ left_meter_modes=1 1 1
 right_meters=RightCPUs2 Tasks LoadAverage Uptime
 right_meter_modes=1 2 2 2
 EOF
-
+fi
 print_info "Configuration du firewall..."
 
 ufw default deny incoming
@@ -219,7 +221,8 @@ print_info "Configuration de fail2ban (SSH)..."
 
 install -d /etc/fail2ban/jail.d
 
-cat >/etc/fail2ban/jail.d/sshd.local <<'EOF'
+if [ ! -f "/etc/fail2ban/jail.d/sshd.local" ]; then
+    cat >/etc/fail2ban/jail.d/sshd.local <<'EOF'
 [sshd]                     # Jail SSH (protection des connexions SSH)
 enabled = true            # Active la protection fail2ban pour SSH
 backend = systemd         # Utilise systemd pour lire les logs
@@ -230,6 +233,8 @@ bantime = 10m             # Bannissement de 10 minutes après dépassement
 bantime.increment = true  # Augmente le temps de ban si récidive
 ignoreip = 127.0.0.1/8    # Ignore localhost (jamais banni)
 EOF
+    systemctl restart fail2ban
+fi
 
 systemctl enable fail2ban
 systemctl restart fail2ban
@@ -243,7 +248,8 @@ cat >/etc/security/limits.conf <<'EOF'
 * hard nproc 65535
 EOF
 
-cat >>/etc/sysctl.conf <<'EOF'
+if ! grep -q "net.ipv4.ip_forward = 1" /etc/sysctl.conf; then
+    cat >>/etc/sysctl.conf <<'EOF'
 net.core.somaxconn = 1024
 net.core.netdev_max_backlog = 5000
 net.ipv4.tcp_max_syn_backlog = 4096
@@ -253,8 +259,8 @@ net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
 net.ipv4.ip_forward = 1
 EOF
-
 sysctl --system
+fi
 
 USER_HOME=$(eval echo "~${SUDO_USER:-root}")
 BASHRC="$USER_HOME/.bashrc"
