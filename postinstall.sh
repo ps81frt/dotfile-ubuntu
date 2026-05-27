@@ -262,16 +262,20 @@ EOF
 sysctl --system
 fi
 
+cat >> /root/.bashrc <<'EOF'
+
+if [ \"\$USER\" = \"root\" ]; then
+    PS1='\${debian_chroot:+(\$debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+    export PS1
+fi
+EOF
+
 USER_HOME=$(eval echo "~${SUDO_USER:-root}")
 BASHRC="$USER_HOME/.bashrc"
 
 if ! grep -q "PS1_CONF_SET" "$BASHRC"; then
     cat >>"$BASHRC" <<'EOF'
 
-# PS1_CONF_SET
-if [ "$USER" = "root" ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
-fi
 export PS1
 
 alias ll='ls -alF'
