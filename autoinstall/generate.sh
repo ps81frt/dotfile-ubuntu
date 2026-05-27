@@ -42,13 +42,7 @@ GRUB_TERMINAL="console"            # "console" ou "gfxterm" (graphique)
 GRUB_DISABLE_OS_PROBER="true"      # "true" = pas de détection dual-boot, "false" sinon
 
 # Paquets supplémentaires (laisser vide si aucun)
-EXTRA_PACKAGES="
-    - curl
-    - git
-    - vim
-    - htop
-    - net-tools"
-
+EXTRA_PACKAGES=$'\n    - curl\n    - git\n    - vim\n    - htop\n    - net-tools\n    - open-vm-tools-desktop\n    - openssh-server\n    - bash-completion\n    - wget\n    - unzip\n    - zip\n    - tree\n    - lsof\n    - dnsutils\n    - traceroute\n    - whois\n    - nmap\n    - tcpdump\n    - gnome-tweaks'
 # Snaps supplémentaires (laisser vide si aucun)
 EXTRA_SNAPS=""
 
@@ -228,42 +222,62 @@ autoinstall:
     flavor: ${KERNEL_FLAVOR}
 
   late-commands:
-    - >-
-      curtin in-target --
-      sed -i /etc/default/grub -e
-      's/GRUB_CMDLINE_LINUX_DEFAULT=".*/GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE}"/'
-    - >-
-      curtin in-target --
-      sed -i /etc/default/grub -e
-      's/^#\?GRUB_TIMEOUT=.*/GRUB_TIMEOUT=${GRUB_TIMEOUT}/'
-    - >-
-      curtin in-target --
-      sed -i /etc/default/grub -e
-      's/^#\?GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=${GRUB_TIMEOUT_STYLE}/'
-    - >-
-      curtin in-target --
-      sed -i /etc/default/grub -e
-      's/^#\?GRUB_TERMINAL=.*/GRUB_TERMINAL=${GRUB_TERMINAL}/'
-    - >-
-      curtin in-target --
-      sed -i /etc/default/grub -e
-      's/^#\?GRUB_DISABLE_OS_PROBER=.*/GRUB_DISABLE_OS_PROBER=${GRUB_DISABLE_OS_PROBER}/'
-    - curtin in-target -- update-grub
-    - rm /target/etc/netplan/00-installer-config*yaml
-    - >-
-      printf "network:\n  version: 2\n  renderer: ${NETWORK_RENDERER}"
-      > /target/etc/netplan/01-network-manager-all.yaml
-    - sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin ${SSH_ROOT_LOGIN}/' /target/etc/ssh/sshd_config
-    - >-
-      curtin in-target -- apt-get remove -y
-      ubuntu-server ubuntu-server-minimal
-      binutils byobu curl dmeventd finalrd gawk
-      kpartx mdadm ncurses-term needrestart open-iscsi openssh-server
-      sg3-utils ssh-import-id sssd thin-provisioning-tools vim tmux
-      sosreport screen open-vm-tools motd-news-config lxd-agent-loader
-      landscape-common htop git fonts-ubuntu-console ethtool
-    - curtin in-target -- apt-get install -y cloud-init
-    - curtin in-target -- apt-get autoremove -y
+      - curtin in-target -- add-apt-repository universe -y
+      - curtin in-target -- add-apt-repository multiverse -y
+      - curtin in-target -- add-apt-repository restricted -y
+      - curtin in-target -- apt-get update
+      - >-
+        curtin in-target -- apt-get install -y
+        build-essential dkms linux-headers-generic linux-tools-common
+        autoconf automake cmake ninja-build meson pkg-config
+        gcc g++ gdb clang lldb llvm lld make patch fakeroot
+        bc flex bison libssl-dev libelf-dev libncurses-dev ncurses-dev
+        dwarves pahole debhelper ccache mold
+        neovim nano tmux screen btop rsync cpio kmod file jq
+        ripgrep fd-find bat
+        tar gzip bzip2 xz-utils zstd lz4 p7zip-full p7zip-rar rar unrar
+        openssh-client iputils-ping
+        python3 python3-pip python3-venv
+        ca-certificates gnupg lsb-release software-properties-common apt-transport-https
+        ffmpeg imagemagick ufw fail2ban qtbase5-dev cloud-init
+        smartmontools hdparm nvme-cli lshw dmidecode hwinfo inxi
+        sysstat iotop iftop nethogs bmon
+        strace ltrace valgrind
+        pciutils usbutils ethtool iproute2 acpi
+        lm-sensors stress stress-ng memtester fio
+        linux-tools-generic
+      - >-
+        curtin in-target --
+        sed -i /etc/default/grub -e
+        's/GRUB_CMDLINE_LINUX_DEFAULT=".*/GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE}"/'
+      - >-
+        curtin in-target --
+        sed -i /etc/default/grub -e
+        's/^#\?GRUB_TIMEOUT=.*/GRUB_TIMEOUT=${GRUB_TIMEOUT}/'
+      - >-
+        curtin in-target --
+        sed -i /etc/default/grub -e
+        's/^#\?GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=${GRUB_TIMEOUT_STYLE}/'
+      - >-
+        curtin in-target --
+        sed -i /etc/default/grub -e
+        's/^#\?GRUB_TERMINAL=.*/GRUB_TERMINAL=${GRUB_TERMINAL}/'
+      - >-
+        curtin in-target --
+        sed -i /etc/default/grub -e
+        's/^#\?GRUB_DISABLE_OS_PROBER=.*/GRUB_DISABLE_OS_PROBER=${GRUB_DISABLE_OS_PROBER}/'
+      - curtin in-target -- update-grub
+      - rm /target/etc/netplan/00-installer-config*yaml
+      - >-
+        printf "network:\n  version: 2\n  renderer: ${NETWORK_RENDERER}"
+        > /target/etc/netplan/01-network-manager-all.yaml
+      - sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin ${SSH_ROOT_LOGIN}/' /target/etc/ssh/sshd_config
+      - >-
+        curtin in-target -- apt-get remove -y
+        ubuntu-server
+        motd-news-config lxd-agent-loader
+        landscape-common
+      - curtin in-target -- apt-get autoremove -y
 
   updates: ${AUTO_UPDATES}
 
