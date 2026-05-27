@@ -121,8 +121,8 @@ config.font = wezterm.font_with_fallback({\
 
 echo 'config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua'
 
-sudo rm /root/.vimrc
-sudo rm /home/$USER/.vimrc
+sudo rm /root/.vimrc || true
+sudo rm /home/$USER/.vimrc || true
 TARGET_USER_VIMRC="/home/$SUDO_USER/.vimrc"
 TARGET_ROOT_VIMRC="/root/.vimrc"
 if [ ! -f "$TARGET_USER_VIMRC" ]; then
