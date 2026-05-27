@@ -9,3 +9,11 @@ watch -n 3 df -hT /dev/mapper/*
 ```bash
 sudo tail -f /var/log/installer/subiquity-server-*
 ```
+## Controle
+
+```bash
+efibootmgr
+```
+```bash
+sudo reboot -f
+```
