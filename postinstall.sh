@@ -121,10 +121,11 @@ config.font = wezterm.font_with_fallback({\
 
 echo 'config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua'
 
-sudo rm /root/.vimrc || true
-sudo rm /home/$USER/.vimrc || true
+rm -f /root/.vimrc /home/"$SUDO_USER"/.vimrc
+
 TARGET_USER_VIMRC="/home/$SUDO_USER/.vimrc"
 TARGET_ROOT_VIMRC="/root/.vimrc"
+
 if [ ! -f "$TARGET_USER_VIMRC" ]; then
     cat > "$TARGET_USER_VIMRC" <<'EOF'
 " Améliorations VIM
@@ -161,10 +162,12 @@ inoremap <C-s> <Esc>:w<CR>
 nnoremap <C-q> :q!<CR>
 nnoremap <space>s :saveas<Space>
 EOF
-
-if [ -n "$SUDO_USER" ]; then
-    cp /root/.vimrc /home/"$SUDO_USER"/.vimrc
-    chown "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.vimrc
+    chown "$SUDO_USER":"$SUDO_USER" "$TARGET_USER_VIMRC"
+    
+    cp "$TARGET_USER_VIMRC" "$TARGET_ROOT_VIMRC"
+    print_info "Configuration VIM installée."
+else
+    print_info "Configuration VIM déjà existante, aucune modification."
 fi
 
 mkdir -p /root/.config/htop
