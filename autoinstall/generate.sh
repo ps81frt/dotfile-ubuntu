@@ -227,7 +227,6 @@ autoinstall:
       - curtin in-target -- add-apt-repository universe -y
       - curtin in-target -- add-apt-repository multiverse -y
       - curtin in-target -- add-apt-repository restricted -y
-      - curtin in-target -- apt-get update
       - >-
         curtin in-target --
         sed -i /etc/default/grub -e
