@@ -116,18 +116,76 @@ if ! shopt -oq posix; then
     fi
 fi
 
-# Chargement des alias
-if [ -f ~/.bash_aliases ]; then
-    source ~/.bash_aliases
-fi
+# ==============================================================================
+# ALIAS ET FONCTIONS PERSONNALISES
+# ==============================================================================
+
+alias update='apt update && apt upgrade -y'
+alias install='apt install'
+alias remove='apt remove'
+alias search='apt search'
+alias ports='netstat -tulpn'
+alias meminfo='free -m -h'
+alias disks='df -h'
+alias myip='curl ifconfig.me'
+alias weather='curl wttr.in'
+alias cheat='curl cheat.sh'
+alias hist='history | grep'
+alias mkdir='mkdir -pv'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias diff='colordiff'
+alias tree='tree -C'
+alias htop='htop -C'
 alias editp='gnome-text-editor'
-alias fetch='neofetch'
+alias fetch='fastfetch'
 alias cls='clear'
 alias v='nvim'
+alias logout='gnome-session-quit --logout --no-prompt'
+
 histdel() {
     history -c
     history -w
     rm -f ~/.bash_history
     source ~/.bashrc
 }
-alias logout='gnome-session-quit --logout --no-prompt'
+
+if command -v bat &>/dev/null; then
+    alias cat='bat'
+fi
+
+if command -v exa &>/dev/null; then
+    alias ls='exa --icons'
+    alias ll='exa -l --icons'
+    alias la='exa -la --icons'
+    alias tree='exa --tree --icons'
+fi
+
+if command -v duf &>/dev/null; then
+    alias df='duf'
+fi
+
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+ex() {
+    if [ -f $1 ]; then
+        case $1 in
+        *.tar.bz2) tar xjf $1 ;;
+        *.tar.gz) tar xzf $1 ;;
+        *.bz2) bunzip2 $1 ;;
+        *.rar) unrar e $1 ;;
+        *.gz) gunzip $1 ;;
+        *.tar) tar xf $1 ;;
+        *.tbz2) tar xjf $1 ;;
+        *.tgz) tar xzf $1 ;;
+        *.zip) unzip $1 ;;
+        *.Z) uncompress $1 ;;
+        *.7z) 7z x $1 ;;
+        *) echo "'$1' ne peut pas être extrait" ;;
+        esac
+    else
+        echo "'$1' n'est pas un fichier valide"
+    fi
+}
