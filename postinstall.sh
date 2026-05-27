@@ -120,7 +120,14 @@ config.font = wezterm.font_with_fallback({\
 })' "$USER_HOME/.config/wezterm/wezterm.lua"
 
 echo 'config.color_scheme = "nightfox" ~/.config/wezterm/wezterm.lua'
-cat >/root/.vimrc <<'EOF'
+
+sudo rm /root/.vimrc
+sudo rm /home/$USER/.vimrc
+TARGET_USER_VIMRC="/home/$SUDO_USER/.vimrc"
+TARGET_ROOT_VIMRC="/root/.vimrc"
+if [ ! -f "$TARGET_USER_VIMRC" ]; then
+    cat > "$TARGET_USER_VIMRC" <<'EOF'
+" Améliorations VIM
 set number
 set relativenumber
 set tabstop=4
@@ -131,19 +138,28 @@ set smartindent
 set mouse=a
 set encoding=utf-8
 syntax on
-set background=dark
-colorscheme desert
-set cursorline
 set showmatch
 set hlsearch
 set incsearch
 set ignorecase
 set smartcase
+set hidden
+set wildmenu
+set showcmd
+set scrolloff=5
+set splitright
+set splitbelow
+set backspace=indent,eol,start
+set termguicolors
+set clipboard+=unnamedplus
+set listchars=tab:>·,trail:·
 
+" Mapping pratiques
 nnoremap <space> :
 nnoremap <C-s> :w<CR>
 inoremap <C-s> <Esc>:w<CR>
 nnoremap <C-q> :q!<CR>
+nnoremap <space>s :saveas<Space>
 EOF
 
 if [ -n "$SUDO_USER" ]; then
@@ -239,8 +255,16 @@ sysctl --system
 
 USER_HOME=$(eval echo "~${SUDO_USER:-root}")
 BASHRC="$USER_HOME/.bashrc"
-if ! grep -q "alias ll='ls -alF'" "/home/$SUDO_USER/.bashrc"; then
-    cat >>"/home/$SUDO_USER/.bashrc" <<'EOF'   
+
+if ! grep -q "alias ll='ls -alF'" "$BASHRC"; then
+    cat >>"$BASHRC" <<'EOF'
+
+if [ "$USER" = "root" ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$ '
+fi
+export PS1
 
 alias ll='ls -alF'
 alias la='ls -A'
@@ -317,7 +341,8 @@ ex() {
     fi
 }
 EOF
-    print_info "Alias ajoutés avec succès."
+    chown "${SUDO_USER:-root}:${SUDO_USER:-root}" "$BASHRC"
+    print_info "Alias et configuration couleur ajoutés avec succès."
 else
     print_info "Les alias existent déjà, pas d'ajout effectué."
 fi
