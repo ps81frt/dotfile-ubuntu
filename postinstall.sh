@@ -127,7 +127,7 @@ TARGET_USER_VIMRC="/home/$SUDO_USER/.vimrc"
 TARGET_ROOT_VIMRC="/root/.vimrc"
 
 if [ ! -f "$TARGET_USER_VIMRC" ]; then
-    cat > "$TARGET_USER_VIMRC" <<'EOF'
+    cat >"$TARGET_USER_VIMRC" <<'EOF'
 " Améliorations VIM
 set number
 set relativenumber
@@ -163,7 +163,7 @@ nnoremap <C-q> :q!<CR>
 nnoremap <space>s :saveas<Space>
 EOF
     chown "$SUDO_USER":"$SUDO_USER" "$TARGET_USER_VIMRC"
-    
+
     cp "$TARGET_USER_VIMRC" "$TARGET_ROOT_VIMRC"
     print_info "Configuration VIM installée."
 else
@@ -259,17 +259,16 @@ net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_syncookies = 1
 net.ipv4.ip_forward = 1
 EOF
-sysctl --system
+    sysctl --system
 fi
 
-sudo sh -c "cat >> /root/.bashrc <<'EOF'
+sudo tee -a /root/.bashrc <<'EOF'
 
-if [ \"\$USER\" = \"root\" ]; then
-    PS1='\${debian_chroot:+(\$debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+if [ "$USER" = "root" ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
     export PS1
 fi
 EOF
-
 USER_HOME=$(eval echo "~${SUDO_USER:-root}")
 BASHRC="$USER_HOME/.bashrc"
 
@@ -366,8 +365,8 @@ echo -e "${YELLOW}• HTOP${NC}"
 echo -e "${YELLOW}• Git, Curl, Wget${NC}"
 echo -e "${YELLOW}• Build essential${NC}"
 echo -e "${YELLOW}• Outils réseau et sécurité${NC}"
-echo -e "${YELLOW}• SSH Server openssh-server${NC}"
-echo -e "${YELLOW}• Utilitaires système tree, ncdu, tmux, screen${NC}"
+echo -e "${YELLOW}• SSH Server (openssh-server)${NC}"
+echo -e "${YELLOW}• Utilitaires système (tree, ncdu, tmux, screen)${NC}"
 echo -e "${YELLOW}• Pastebinit + fastfetch${NC}"
 echo ""
 echo -e "${GREEN}Configs installées :${NC}"
@@ -387,10 +386,10 @@ echo ""
 echo -e "${GREEN}Optimisations :${NC}"
 echo -e "${YELLOW}• Configuration VIM${NC}"
 echo -e "${YELLOW}• Configuration HTOP${NC}"
-echo -e "${YELLOW}• Limites système augmentées ulimits${NC}"
-echo -e "${YELLOW}• Optimisations réseau TCP/sysctl${NC}"
+echo -e "${YELLOW}• Limites système augmentées (ulimits)${NC}"
+echo -e "${YELLOW}• Optimisations réseau (TCP/sysctl)${NC}"
 echo ""
 echo -e "${GREEN}Recommandations :${NC}"
 echo -e "${YELLOW}• Reconnect session ou reboot si alias non chargés${NC}"
 echo -e "${GREEN}================================${NC}"
-echo -e "Post-installation terminée avec succès "
+print_info "Post-installation terminée avec succès !"
