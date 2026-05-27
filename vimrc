@@ -9,8 +9,6 @@ set smartindent
 set mouse=a
 set encoding=utf-8
 syntax on
-colorscheme desert
-set cursorline
 set showmatch
 set hlsearch
 set incsearch
