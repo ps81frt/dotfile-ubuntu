@@ -237,8 +237,10 @@ EOF
 
 sysctl --system
 
-print_info "Création des alias..."
-cat >>"/home/$SUDO_USER/.bashrc" <<'EOF'
+USER_HOME=$(eval echo "~${SUDO_USER:-root}")
+BASHRC="$USER_HOME/.bashrc"
+if ! grep -q "alias ll='ls -alF'" "/home/$SUDO_USER/.bashrc"; then
+    cat >>"/home/$SUDO_USER/.bashrc" <<'EOF'   
 
 alias ll='ls -alF'
 alias la='ls -A'
@@ -315,6 +317,10 @@ ex() {
     fi
 }
 EOF
+    print_info "Alias ajoutés avec succès."
+else
+    print_info "Les alias existent déjà, pas d'ajout effectué."
+fi
 
 print_info "Correction des sources APT..."
 
