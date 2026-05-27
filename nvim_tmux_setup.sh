@@ -224,6 +224,29 @@ return {
       },
     },
   },
+  {
+  "nvim-neo-tree/neo-tree.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-tree/nvim-web-devicons",
+    "MunifTanjim/nui.nvim",
+  },
+  opts = {
+    filesystem = {
+      window = {
+        position = "right",
+        },
+        },
+    },
+},
+
+{
+  "nvim-telescope/telescope.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+  },
+  opts = {},
+},
 }
 EOF
 
