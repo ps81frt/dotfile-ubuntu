@@ -229,26 +229,6 @@ autoinstall:
       - curtin in-target -- add-apt-repository restricted -y
       - curtin in-target -- apt-get update
       - >-
-        curtin in-target -- apt-get install -y
-        build-essential dkms linux-headers-generic linux-tools-common
-        autoconf automake cmake ninja-build meson pkg-config
-        gcc g++ gdb clang lldb llvm lld make patch fakeroot
-        bc flex bison libssl-dev libelf-dev libncurses-dev ncurses-dev
-        dwarves pahole debhelper ccache mold
-        neovim nano tmux screen btop rsync cpio kmod file jq
-        ripgrep fd-find bat
-        tar gzip bzip2 xz-utils zstd lz4 p7zip-full p7zip-rar rar unrar
-        openssh-client iputils-ping
-        python3 python3-pip python3-venv
-        ca-certificates gnupg lsb-release software-properties-common apt-transport-https
-        ffmpeg imagemagick ufw fail2ban qtbase5-dev cloud-init
-        smartmontools hdparm nvme-cli lshw dmidecode hwinfo inxi
-        sysstat iotop iftop nethogs bmon
-        strace ltrace valgrind
-        pciutils usbutils ethtool iproute2 acpi
-        lm-sensors stress stress-ng memtester fio
-        linux-tools-generic
-      - >-
         curtin in-target --
         sed -i /etc/default/grub -e
         's/GRUB_CMDLINE_LINUX_DEFAULT=".*/GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE}"/'
@@ -273,7 +253,7 @@ autoinstall:
       - >-
         printf "network:\n  version: 2\n  renderer: ${NETWORK_RENDERER}"
         > /target/etc/netplan/01-network-manager-all.yaml
-      - sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin ${SSH_ROOT_LOGIN}/' /target/etc/ssh/sshd_config
+      - curtin in-target -- sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin ${SSH_ROOT_LOGIN}/' /target/etc/ssh/sshd_config
       - >-
         curtin in-target -- apt-get remove -y
         ubuntu-server
