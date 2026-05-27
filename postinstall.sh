@@ -24,18 +24,30 @@ apt update && apt upgrade -y
 apt autoremove -y
 
 print_info "Installation des paquets..."
-apt install -y \
-    curl wget git build-essential software-properties-common \
-    apt-transport-https ca-certificates gnupg lsb-release unzip zip \
-    gzip tar vim nano neovim htop ncdu tree tmux screen \
-    net-tools nmap ufw fail2ban openssh-server rsync jq fzf \
-    ripgrep fd-find bat duf p7zip-full strace ltrace \
-    lsof iotop nethogs iftop sqlite3 python3 python3-pip python3-venv \
-    pastebinit fastfetch unrar fakeroot devscripts \
-    libncurses-dev libelf-dev libssl-dev dwarves \
-    flex bison bc cpio kmod gawk openssl dkms \
-    libudev-dev libpci-dev libiberty-dev autoconf llvm \
-    zstd lzop u-boot-tools rsync sassc
+apt-get install -y \
+    build-essential dkms linux-headers-generic linux-tools-generic linux-tools-common \
+    autoconf automake cmake ninja-build meson pkg-config \
+    gcc g++ gdb clang lldb llvm lld make patch fakeroot devscripts \
+    bc flex bison libssl-dev libelf-dev libncurses-dev ncurses-dev \
+    dwarves pahole debhelper ccache mold \
+    neovim nano tmux screen btop rsync cpio kmod file jq \
+    ripgrep fd-find bat \
+    tar gzip bzip2 xz-utils zstd lz4 lzop p7zip-full p7zip-rar rar unrar \
+    openssh-client openssh-server iputils-ping \
+    python3 python3-pip python3-venv \
+    ca-certificates gnupg lsb-release software-properties-common apt-transport-https \
+    ffmpeg imagemagick ufw fail2ban qtbase5-dev cloud-init \
+    smartmontools hdparm nvme-cli lshw dmidecode hwinfo inxi \
+    sysstat iotop iftop nethogs bmon \
+    strace ltrace valgrind \
+    pciutils usbutils ethtool iproute2 acpi \
+    lm-sensors stress stress-ng memtester fio \
+    curl wget git vim nano htop ncdu tree net-tools nmap \
+    lsof sqlite3 pastebinit fastfetch fzf duf \
+    libpci-dev libudev-dev libiberty-dev openssl dkms \
+    zip unzip gawk kmod openssl u-boot-tools sassc \
+    libncurses-dev libelf-dev libssl-dev \
+    flex bison bc cpio kmod gawk openssl dkms
 snap install core
 snap refresh
 snap install micro --classic
