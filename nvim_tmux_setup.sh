@@ -225,20 +225,22 @@ return {
     },
   },
   {
-  "nvim-neo-tree/neo-tree.nvim",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons",
-    "MunifTanjim/nui.nvim",
-  },
-  opts = {
-    filesystem = {
-      window = {
-        position = "right",
-        },
-        },
+    "nvim-neo-tree/neo-tree.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
     },
-},
+    opts = function(_, opts)
+      opts.window = opts.window or {}
+      opts.window.position = "right"
+      opts.window.width = 32
+      return opts
+    end,
+    keys = {
+      { "<leader>e", "<cmd>Neotree toggle<CR>", desc = "NeoTree toggle" },
+    },
+  },
 
 {
   "nvim-telescope/telescope.nvim",
