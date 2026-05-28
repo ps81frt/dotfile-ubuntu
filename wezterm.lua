@@ -56,7 +56,7 @@ config.initial_rows = 30
 config.keys = {
 
 	-- =========================
-	-- 🪟 SPLITS (UNCHANGED)
+	-- 🪟 SPLITS
 	-- =========================
 
 	{
@@ -76,7 +76,7 @@ config.keys = {
 	},
 
 	-- =========================
-	-- 🧭 NAVIGATION (UNCHANGED)
+	-- 🧭 NAVIGATION
 	-- =========================
 
 	{
@@ -101,7 +101,7 @@ config.keys = {
 	},
 
 	-- =========================
-	-- 🔁 MOVE MODE (NEW CLEAN FIX)
+	-- 🔁 MOVE MODE
 	-- =========================
 
 	{
@@ -114,7 +114,7 @@ config.keys = {
 	},
 
 	-- =========================
-	-- ❌ CLOSE PANE (FIXED confirm typo)
+	-- ❌ CLOSE PANE
 	-- =========================
 
 	{
