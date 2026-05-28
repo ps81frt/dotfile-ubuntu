@@ -16,6 +16,7 @@ fi
 ########################################
 # CONFIGURATION GÉNÉRALE
 ########################################
+sudo apt install gnome-shell-extensions gnome-tweaks
 
 echo "Configuration générale de GNOME"
 
