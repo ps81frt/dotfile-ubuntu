@@ -47,7 +47,7 @@ apt-get install -y \
     libpci-dev libudev-dev libiberty-dev openssl dkms \
     zip unzip gawk kmod openssl u-boot-tools sassc \
     libncurses-dev libelf-dev libssl-dev \
-    flex bison bc cpio kmod gawk openssl dkms
+    flex bison bc cpio kmod gawk openssl dkms \
     gnome-shell-extensions gnome-tweaks
 
 snap install core
