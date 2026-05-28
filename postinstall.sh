@@ -48,7 +48,7 @@ apt-get install -y \
     zip unzip gawk kmod openssl u-boot-tools sassc \
     libncurses-dev libelf-dev libssl-dev \
     flex bison bc cpio kmod gawk openssl dkms \
-    gnome-shell-extensions gnome-tweaks
+    gnome-shell-extensions gnome-tweaks colordiff
 
 snap install core
 snap refresh
