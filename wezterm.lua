@@ -5,7 +5,8 @@ local config = wezterm.config_builder()
 -- =========================
 -- 🎨 APPARENCE
 -- =========================
-config.color_scheme = "Gruvbox dark, medium (base16)"
+---config.color_scheme = "Gruvbox dark, medium (base16)"
+config.color_scheme = "nightfox"
 config.window_background_opacity = 0.92
 config.macos_window_background_blur = 20
 
@@ -20,6 +21,7 @@ config.window_padding = {
 -- 🔤 FONT
 -- =========================
 config.font = wezterm.font_with_fallback({
+	"Red Hat Mono",
 	"Hack Nerd Font Mono",
 	"JetBrains Mono",
 })
@@ -122,6 +124,14 @@ config.keys = {
 			confirm = true,
 		}),
 	},
+	{
+		key = "r",
+		mods = "CTRL|SHIFT",
+		action = wezterm.action.ActivateKeyTable({
+			name = "resize_pane",
+			one_shot = false,
+		}),
+	},
 }
 
 -- =========================
@@ -152,7 +162,7 @@ config.key_tables = {
 		-- swap / confirm reposition
 		{
 			key = "Enter",
-			action = wezterm.action.PaneSelect,
+			action = wezterm.action.PopKeyTable,
 		},
 
 		-- exit move mode
@@ -161,16 +171,58 @@ config.key_tables = {
 			action = wezterm.action.PopKeyTable,
 		},
 	},
+	resize_pane = {
+
+		{
+			key = "LeftArrow",
+			action = wezterm.action.AdjustPaneSize({ "Left", 3 }),
+		},
+
+		{
+			key = "RightArrow",
+			action = wezterm.action.AdjustPaneSize({ "Right", 3 }),
+		},
+
+		{
+			key = "UpArrow",
+			action = wezterm.action.AdjustPaneSize({ "Up", 1 }),
+		},
+
+		{
+			key = "DownArrow",
+			action = wezterm.action.AdjustPaneSize({ "Down", 1 }),
+		},
+
+		{
+			key = "Escape",
+			action = wezterm.action.PopKeyTable,
+		},
+	},
 }
 
 -- =========================
--- 🖱️ CLIC DROIT COPIER/COLLER
+-- 🖱️ CLIC DROIT COPIER/COLLER/ZOOM
 -- =========================
 config.mouse_bindings = {
+	-- clic droit = coller
 	{
 		event = { Down = { streak = 1, button = "Right" } },
 		mods = "NONE",
 		action = wezterm.action.PasteFrom("Clipboard"),
+	},
+
+	-- CTRL + molette haut = zoom in
+	{
+		event = { Down = { streak = 1, button = { WheelUp = 1 } } },
+		mods = "CTRL",
+		action = wezterm.action.IncreaseFontSize,
+	},
+
+	-- CTRL + molette bas = zoom out
+	{
+		event = { Down = { streak = 1, button = { WheelDown = 1 } } },
+		mods = "CTRL",
+		action = wezterm.action.DecreaseFontSize,
 	},
 }
 
