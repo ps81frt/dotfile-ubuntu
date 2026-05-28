@@ -48,6 +48,8 @@ apt-get install -y \
     zip unzip gawk kmod openssl u-boot-tools sassc \
     libncurses-dev libelf-dev libssl-dev \
     flex bison bc cpio kmod gawk openssl dkms
+    gnome-shell-extensions gnome-tweaks
+
 snap install core
 snap refresh
 snap install micro --classic
