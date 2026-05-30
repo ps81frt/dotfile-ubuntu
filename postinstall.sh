@@ -66,6 +66,21 @@ curl -fsSL https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Hack
     -o /usr/local/share/fonts/HackNerdFontMono-Regular.ttf
 fc-cache -fv
 
+# install fastfetch
+if [ -n "$SUDO_USER" ]; then
+    USER_HOME=$(eval echo "~$SUDO_USER")
+
+    print_info "Configuration de Fastfetch pour $SUDO_USER..."
+
+    mkdir -p "$USER_HOME/Images/wallpapers"
+    mkdir -p "$USER_HOME/.config/fastfetch"
+
+    cp ".config/fastfetch/raccoon-fastfetch.png" "$USER_HOME/Images/wallpapers/"
+    cp ".config/fastfetch/config.jsonc" "$USER_HOME/.config/fastfetch/"
+
+    chown -R "$SUDO_USER":"$SUDO_USER" "$USER_HOME/Images" "$USER_HOME/.config/fastfetch"
+fi
+
 #curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
 #echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
 
@@ -78,21 +93,6 @@ rm -f /etc/apt/sources.list.d/wezterm.list /usr/share/keyrings/wezterm-fury.gpg
 curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
 echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
 chmod 644 /usr/share/keyrings/wezterm-fury.gpg
-# install fastfetch
-if [ -n "$SUDO_USER" ]; then
-    USER_HOME=$(eval echo "~$SUDO_USER")
-    SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
-    
-    print_info "Configuration de Fastfetch pour $SUDO_USER..."
-    
-    mkdir -p "$USER_HOME/Images/wallpapers"
-    mkdir -p "$USER_HOME/.config/fastfetch"
-    
-    cp "$SCRIPT_DIR/raccoon-fastfetch.png" "$USER_HOME/Images/wallpapers/"
-    cp "$SCRIPT_DIR/config.jsonc" "$USER_HOME/.config/fastfetch/"
-    
-    chown -R "$SUDO_USER":"$SUDO_USER" "$USER_HOME/Images" "$USER_HOME/.config/fastfetch"
-fi
 
 # Installe WezTerm
 apt update
