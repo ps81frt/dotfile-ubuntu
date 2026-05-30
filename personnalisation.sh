@@ -285,13 +285,25 @@ else
 fi
 
 ########################################
-# TERRMINAL
+# TERMINAL
 ########################################
 gsettings set org.gnome.settings-daemon.plugins.media-keys terminal '[]'
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'WezTerm'
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'wezterm'
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Ctrl><Alt>t'
+
+########################################
+# OPTIMISATION
+########################################
+systemctl --user disable evolution-alarm-notify
+systemctl --user disable evolution-source-registry  
+systemctl --user disable evolution-addressbook-factory
+systemctl --user stop evolution-alarm-notify
+systemctl --user stop evolution-source-registry
+systemctl --user stop evolution-addressbook-factory
+systemctl --user disable update-notifier
+systemctl --user stop update-notifier
 
 ########################################
 # EXTENSIONS BONUS
