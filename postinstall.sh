@@ -81,17 +81,19 @@ chmod 644 /usr/share/keyrings/wezterm-fury.gpg
 # install fastfetch
 if [ -n "$SUDO_USER" ]; then
     USER_HOME=$(eval echo "~$SUDO_USER")
+    SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
     
     print_info "Configuration de Fastfetch pour $SUDO_USER..."
     
     mkdir -p "$USER_HOME/Images/wallpapers"
     mkdir -p "$USER_HOME/.config/fastfetch"
     
-    cp "$PWD/raccoon-fastfetch.png" "$USER_HOME/Images/wallpapers/"
-    cp "$PWD/config.jsonc" "$USER_HOME/.config/fastfetch/"
+    cp "$SCRIPT_DIR/raccoon-fastfetch.png" "$USER_HOME/Images/wallpapers/"
+    cp "$SCRIPT_DIR/config.jsonc" "$USER_HOME/.config/fastfetch/"
     
     chown -R "$SUDO_USER":"$SUDO_USER" "$USER_HOME/Images" "$USER_HOME/.config/fastfetch"
 fi
+
 # Installe WezTerm
 apt update
 apt install -y wezterm-nightly
