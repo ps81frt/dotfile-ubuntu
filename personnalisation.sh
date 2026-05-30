@@ -297,13 +297,33 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/or
 # OPTIMISATION
 ########################################
 systemctl --user disable evolution-alarm-notify
-systemctl --user disable evolution-source-registry  
+systemctl --user disable evolution-source-registry
 systemctl --user disable evolution-addressbook-factory
 systemctl --user stop evolution-alarm-notify
 systemctl --user stop evolution-source-registry
 systemctl --user stop evolution-addressbook-factory
 systemctl --user disable update-notifier
 systemctl --user stop update-notifier
+systemctl --user mask evolution-alarm-notify
+systemctl --user mask evolution-source-registry
+systemctl --user mask evolution-addressbook-factory
+systemctl --user mask evolution-calendar-factory
+systemctl --user mask update-notifier
+pkill -f evolution
+
+# Revert Optimisation
+# systemctl --user unmask evolution-alarm-notify
+# systemctl --user unmask evolution-source-registry
+# systemctl --user unmask evolution-addressbook-factory
+# systemctl --user unmask evolution-calendar-factory
+# systemctl --user unmask update-notifier
+# systemctl --user enable evolution-alarm-notify
+# systemctl --user enable evolution-source-registry
+# systemctl --user enable evolution-addressbook-factory
+# systemctl --user enable update-notifier
+# systemctl --user start evolution-alarm-notify
+# systemctl --user start evolution-source-registry
+# systemctl --user start evolution-addressbook-factory
 
 ########################################
 # EXTENSIONS BONUS
