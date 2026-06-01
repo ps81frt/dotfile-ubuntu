@@ -35,7 +35,7 @@ KERNEL_FLAVOR="hwe"        # flaveur kernel : "hwe" ou "generic"
 NETWORK_RENDERER="NetworkManager"  # "NetworkManager" (desktop) ou "networkd" (server)
 
 # --- GRUB ---
-GRUB_CMDLINE="quiet splash"        # options kernel ex: "quiet splash", "" pour rien
+GRUB_CMDLINE="splash"        # options kernel ex: "quiet splash", "" pour rien
 GRUB_TIMEOUT="5"                   # délai menu GRUB en secondes (0 = pas de menu)
 GRUB_TIMEOUT_STYLE="menu"        # "hidden" (pas de menu sauf Shift) ou "menu"
 GRUB_TERMINAL="console"            # "console" ou "gfxterm" (graphique)
