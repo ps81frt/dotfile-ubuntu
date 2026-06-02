@@ -329,6 +329,7 @@ alias v='nvim'
 alias lf='ls -alp | grep -v "/$"'
 alias ldir='ls -alp | grep "/$"'
 alias latr='ls -latr'
+alias ldat='ls -lta --color=auto'
 
 
 histdel() {
@@ -358,6 +359,42 @@ ex() {
         esac
     else echo "'$1' invalide"; fi
 }
+
+compress() {
+    case $1 in
+        -h|--help|-help)
+            echo "Usage: compress <archive> <fichier/dossier>"
+            echo ""
+            echo "Formats supportés:"
+            echo "  .tar.gz / .tgz    compression gzip"
+            echo "  .tar.bz2 / .tbz2  compression bzip2"
+            echo "  .tar              pas de compression"
+            echo "  .gz               gzip (fichier unique)"
+            echo "  .bz2              bzip2 (fichier unique)"
+            echo "  .zip              zip"
+            echo "  .7z               7-zip"
+            echo ""
+            echo "Exemples:"
+            echo "  compress archive.tar.gz  mon_dossier/"
+            echo "  compress backup.zip      fichier.txt"
+            return 0
+            ;;
+    esac
+    if [ -z "$2" ]; then echo "Usage: compress <archive> <fichier/dossier>"; return 1; fi
+    case $1 in
+        *.tar.bz2) tar cjf "$1" "$2" ;;
+        *.tar.gz)  tar czf "$1" "$2" ;;
+        *.bz2)     bzip2 -k "$2" ;;
+        *.gz)      gzip -k "$2" ;;
+        *.tar)     tar cf "$1" "$2" ;;
+        *.tbz2)    tar cjf "$1" "$2" ;;
+        *.tgz)     tar czf "$1" "$2" ;;
+        *.zip)     zip -r "$1" "$2" ;;
+        *.7z)      7z a "$1" "$2" ;;
+        *) echo "'$1' extension non supportée" ;;
+    esac
+}
+
 EOF
     chown "${SUDO_USER:-root}:${SUDO_USER:-root}" "$BASHRC"
 fi
