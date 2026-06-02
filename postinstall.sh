@@ -330,6 +330,7 @@ alias lf='ls -alp | grep -v "/$"'
 alias ldir='ls -alp | grep "/$"'
 alias latr='ls -latr'
 alias ldat='ls -lta --color=auto'
+alias gdiff='git diff --no-index'
 
 
 histdel() {
@@ -359,11 +360,15 @@ ex() {
         esac
     else echo "'$1' invalide"; fi
 }
-
 compress() {
-    case $1 in
-        -h|--help|-help)
-            echo "Usage: compress <archive> <fichier/dossier>"
+    local outdir=""
+    while true; do
+        case $1 in
+        -h | --help | -help)
+            echo "Usage: compress <archive> <fichiers/dossiers...> [options]"
+            echo ""
+            echo "Options:"
+            echo "  -o, --output <dossier> dossier de destination de l'archive"
             echo ""
             echo "Formats supportés:"
             echo "  .tar.gz / .tgz    compression gzip"
@@ -375,25 +380,45 @@ compress() {
             echo "  .7z               7-zip"
             echo ""
             echo "Exemples:"
-            echo "  compress archive.tar.gz  mon_dossier/"
-            echo "  compress backup.zip      fichier.txt"
+            echo "  compress Ubuntu.tar *                           # archive tout le dossier courant"
+            echo "  compress Ubuntu.tar.gz *                        # idem en gzip"
+            echo "  compress Ubuntu.zip *                           # idem en zip"
+            echo "  compress archive.tar.gz  mon_dossier/           # compresse le dossier"
+            echo "  compress archive.tar.gz  mon_dossier/*          # compresse le contenu"
+            echo "  compress archive.tar.gz  mon_dossier/* -o ~     # idem, archive dans ~"
             return 0
             ;;
-    esac
-    if [ -z "$2" ]; then echo "Usage: compress <archive> <fichier/dossier>"; return 1; fi
-    case $1 in
-        *.tar.bz2) tar cjf "$1" "$2" ;;
-        *.tar.gz)  tar czf "$1" "$2" ;;
-        *.bz2)     bzip2 -k "$2" ;;
-        *.gz)      gzip -k "$2" ;;
-        *.tar)     tar cf "$1" "$2" ;;
-        *.tbz2)    tar cjf "$1" "$2" ;;
-        *.tgz)     tar czf "$1" "$2" ;;
-        *.zip)     zip -r "$1" "$2" ;;
-        *.7z)      7z a "$1" "$2" ;;
-        *) echo "'$1' extension non supportée" ;;
+        -o | --output)
+            outdir="$2"
+            shift 2
+            ;;
+        *) break ;;
+        esac
+    done
+    if [ -z "$2" ]; then
+        echo "Usage: compress <archive> <fichiers/dossiers...> [-o dossier]"
+        return 1
+    fi
+    local archive="$1"
+    shift
+    local targets=("$@")
+    if [ -n "$outdir" ]; then
+        mkdir -p "$outdir"
+        archive="$outdir/$archive"
+    fi
+    case $archive in
+    *.tar.bz2 | *.tbz2) tar cjf "$archive" "${targets[@]}" ;;
+    *.tar.gz | *.tgz) tar czf "$archive" "${targets[@]}" ;;
+    *.tar) tar cf "$archive" "${targets[@]}" ;;
+    *.bz2) bzip2 -k "${targets[0]}" ;;
+    *.gz) gzip -k "${targets[0]}" ;;
+    *.zip) zip -r "$archive" "${targets[@]}" ;;
+    *.7z) 7z a "$archive" "${targets[@]}" ;;
+    *) echo "'$archive' extension non supportée" ;;
     esac
 }
+
+
 
 EOF
     chown "${SUDO_USER:-root}:${SUDO_USER:-root}" "$BASHRC"
