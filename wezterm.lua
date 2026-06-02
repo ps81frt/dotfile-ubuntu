@@ -5,7 +5,7 @@ local config = wezterm.config_builder()
 -- =========================
 -- 🎨 APPARENCE
 -- =========================
----config.color_scheme = "Gruvbox dark, medium (base16)"
+------config.color_scheme = "Gruvbox dark, medium (base16)"
 config.color_scheme = "nightfox"
 config.window_background_opacity = 0.92
 config.macos_window_background_blur = 20
@@ -203,6 +203,15 @@ config.key_tables = {
 -- =========================
 -- 🖱️ CLIC DROIT COPIER/COLLER/ZOOM
 -- =========================
+
+config.inactive_pane_hsb = {
+	saturation = 0.6,
+	brightness = 0.5,
+}
+config.window_frame = {
+	active_titlebar_bg = "#333333",
+	inactive_titlebar_bg = "#1a1a1a",
+}
 config.mouse_bindings = {
 	-- clic droit = coller
 	{
