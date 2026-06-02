@@ -42,7 +42,7 @@ apt-get install -y \
     strace ltrace valgrind \
     pciutils usbutils ethtool iproute2 acpi \
     lm-sensors stress stress-ng memtester fio \
-    curl wget git vim nano htop ncdu tree net-tools nmap \
+    curl wget git git-delta vim nano htop ncdu tree net-tools nmap \
     lsof sqlite3 pastebinit fastfetch fzf duf \
     libpci-dev libudev-dev libiberty-dev openssl dkms \
     zip unzip gawk kmod openssl u-boot-tools sassc \
@@ -262,6 +262,8 @@ systemctl restart fail2ban
 
 print_info "Optimisations système..."
 
+git config --global core.pager "delta"
+
 cat >/etc/security/limits.conf <<'EOF'
 * soft nofile 65535
 * hard nofile 65535
@@ -317,12 +319,17 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias grep='grep --color=auto'
 alias diff='colordiff'
+alias gdiff='git diff --no-index'
 alias tree='tree -C'
 alias htop='htop -C'
 alias editp='gnome-text-editor'
 alias fetch='fastfetch'
 alias cls='clear'
 alias v='nvim'
+alias lf='ls -alp | grep -v "/$"'
+alias ldir='ls -alp | grep "/$"'
+alias latr='ls -latr'
+
 
 histdel() {
     history -c
