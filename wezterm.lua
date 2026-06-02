@@ -1,5 +1,12 @@
 local wezterm = require("wezterm")
 
+wezterm.on("zoom-font-in", function(window, pane)
+	window:perform_action(wezterm.action.IncreaseFontSize, pane)
+end)
+
+wezterm.on("zoom-font-out", function(window, pane)
+	window:perform_action(wezterm.action.DecreaseFontSize, pane)
+end)
 local config = wezterm.config_builder()
 
 -- =========================
@@ -50,6 +57,7 @@ config.integrated_title_buttons = { "Hide", "Maximize", "Close" }
 config.initial_cols = 120
 config.initial_rows = 30
 
+config.adjust_window_size_when_changing_font_size = false
 -- =========================
 -- 🪟 KEYBINDS
 -- =========================
@@ -203,7 +211,6 @@ config.key_tables = {
 -- =========================
 -- 🖱️ CLIC DROIT COPIER/COLLER/ZOOM
 -- =========================
-
 config.inactive_pane_hsb = {
 	saturation = 0.6,
 	brightness = 0.5,
@@ -212,6 +219,7 @@ config.window_frame = {
 	active_titlebar_bg = "#333333",
 	inactive_titlebar_bg = "#1a1a1a",
 }
+
 config.mouse_bindings = {
 	-- clic droit = coller
 	{
@@ -219,19 +227,17 @@ config.mouse_bindings = {
 		mods = "NONE",
 		action = wezterm.action.PasteFrom("Clipboard"),
 	},
-
 	-- CTRL + molette haut = zoom in
 	{
 		event = { Down = { streak = 1, button = { WheelUp = 1 } } },
 		mods = "CTRL",
-		action = wezterm.action.IncreaseFontSize,
+		action = wezterm.action.EmitEvent("zoom-font-in"),
 	},
-
 	-- CTRL + molette bas = zoom out
 	{
 		event = { Down = { streak = 1, button = { WheelDown = 1 } } },
 		mods = "CTRL",
-		action = wezterm.action.DecreaseFontSize,
+		action = wezterm.action.EmitEvent("zoom-font-out"),
 	},
 }
 
