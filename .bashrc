@@ -74,7 +74,11 @@ esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    if test -r ~/.dircolors; then
+        eval "$(dircolors -b ~/.dircolors)"
+    else
+        eval "$(dircolors -b)"
+    fi
     alias ls='ls --color=auto'
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
@@ -102,6 +106,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
+    # shellcheck source=/dev/null
     . ~/.bash_aliases
 fi
 
@@ -116,10 +121,15 @@ if ! shopt -oq posix; then
     fi
 fi
 
-# ==============================================================================
-# ALIAS ET FONCTIONS PERSONNALISES
-# ==============================================================================
+# PS1_CONF_SET
+if [ "$USER" = "root" ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+fi
+export PS1
 
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 alias update='apt update && apt upgrade -y'
 alias install='apt install'
 alias remove='apt remove'
@@ -134,58 +144,107 @@ alias hist='history | grep'
 alias mkdir='mkdir -pv'
 alias ..='cd ..'
 alias ...='cd ../..'
+alias grep='grep --color=auto'
 alias diff='colordiff'
 alias tree='tree -C'
-alias htop='htop -C'
+#alias htop='htop -G'
 alias editp='gnome-text-editor'
 alias fetch='fastfetch'
 alias cls='clear'
 alias v='nvim'
-alias logout='gnome-session-quit --logout --no-prompt'
 
 histdel() {
     history -c
     history -w
     rm -f ~/.bash_history
+    # shellcheck source=/dev/null
     source ~/.bashrc
 }
 
-if command -v bat &>/dev/null; then
-    alias cat='bat'
-fi
+alias logout='gnome-session-quit --logout --no-prompt'
 
+if command -v bat &>/dev/null; then alias cat='bat'; fi
 if command -v exa &>/dev/null; then
     alias ls='exa --icons'
     alias ll='exa -l --icons'
     alias la='exa -la --icons'
     alias tree='exa --tree --icons'
 fi
+if command -v duf &>/dev/null; then alias df='duf'; fi
 
-if command -v duf &>/dev/null; then
-    alias df='duf'
-fi
-
-mkcd() {
-    mkdir -p "$1" && cd "$1"
-}
+mkcd() { mkdir -p "$1" && cd $1; }
 
 ex() {
-    if [ -f $1 ]; then
+    if [ -f "$1" ]; then
         case $1 in
-        *.tar.bz2) tar xjf $1 ;;
-        *.tar.gz) tar xzf $1 ;;
-        *.bz2) bunzip2 $1 ;;
-        *.rar) unrar e $1 ;;
-        *.gz) gunzip $1 ;;
-        *.tar) tar xf $1 ;;
-        *.tbz2) tar xjf $1 ;;
-        *.tgz) tar xzf $1 ;;
-        *.zip) unzip $1 ;;
-        *.Z) uncompress $1 ;;
-        *.7z) 7z x $1 ;;
-        *) echo "'$1' ne peut pas être extrait" ;;
+        *.tar.bz2) tar xjf "$1" ;; *.tar.gz) tar xzf $1 ;; *.bz2) bunzip2 $1 ;;
+        *.rar) unrar e "$1" ;; *.gz) gunzip $1 ;; *.tar) tar xf $1 ;;
+        *.tbz2) tar xjf "$1" ;; *.tgz) tar xzf $1 ;; *.zip) unzip $1 ;;
+        *.Z) uncompress "$1" ;; *.7z) 7z x $1 ;; *) echo "'$1' invalide" ;;
         esac
-    else
-        echo "'$1' n'est pas un fichier valide"
-    fi
+    else echo "'$1' invalide"; fi
 }
+
+compress() {
+    local outdir=""
+    while true; do
+        case $1 in
+        -h | --help | -help)
+            echo "Usage: compress <archive> <fichiers/dossiers...> [options]"
+            echo ""
+            echo "Options:"
+            echo "  -o, --output <dossier> dossier de destination de l'archive"
+            echo ""
+            echo "Formats supportés:"
+            echo "  .tar.gz / .tgz    compression gzip"
+            echo "  .tar.bz2 / .tbz2  compression bzip2"
+            echo "  .tar              pas de compression"
+            echo "  .gz               gzip (fichier unique)"
+            echo "  .bz2              bzip2 (fichier unique)"
+            echo "  .zip              zip"
+            echo "  .7z               7-zip"
+            echo ""
+            echo "Exemples:"
+            echo "  compress Ubuntu.tar *                           # archive tout le dossier courant"
+            echo "  compress Ubuntu.tar.gz *                        # idem en gzip"
+            echo "  compress Ubuntu.zip *                           # idem en zip"
+            echo "  compress archive.tar.gz  mon_dossier/           # compresse le dossier"
+            echo "  compress archive.tar.gz  mon_dossier/*          # compresse le contenu"
+            echo "  compress archive.tar.gz  mon_dossier/* -o ~     # idem, archive dans ~"
+            return 0
+            ;;
+        -o | --output)
+            outdir="$2"
+            shift 2
+            ;;
+        *) break ;;
+        esac
+    done
+    if [ -z "$2" ]; then
+        echo "Usage: compress <archive> <fichiers/dossiers...> [-o dossier]"
+        return 1
+    fi
+    local archive="$1"
+    shift
+    local targets=("$@")
+    if [ -n "$outdir" ]; then
+        mkdir -p "$outdir"
+        archive="$outdir/$archive"
+    fi
+    case $archive in
+    *.tar.bz2 | *.tbz2) tar cjf "$archive" "${targets[@]}" ;;
+    *.tar.gz | *.tgz) tar czf "$archive" "${targets[@]}" ;;
+    *.tar) tar cf "$archive" "${targets[@]}" ;;
+    *.bz2) bzip2 -k "${targets[0]}" ;;
+    *.gz) gzip -k "${targets[0]}" ;;
+    *.zip) zip -r "$archive" "${targets[@]}" ;;
+    *.7z) 7z a "$archive" "${targets[@]}" ;;
+    *) echo "'$archive' extension non supportée" ;;
+    esac
+}
+
+if [ "$USER" = "root" ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]# '
+    export PS1
+fi
+alias gdiff='git diff --no-index'
