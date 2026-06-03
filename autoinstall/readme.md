@@ -12,7 +12,7 @@ watch -n 3 df -hT /dev/mapper/*
 ```
 ## Log 
 ```bash
-sudo tail -f /var/log/installer/subiquity-server-*
+sudo tail -F /var/log/installer/subiquity-server-*
 ```
 ## Controle
 
