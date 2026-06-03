@@ -94,7 +94,7 @@ curl -fsSL https://apt.fury.io/wez/gpg.key | gpg --yes --dearmor -o /usr/share/k
 echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' >/etc/apt/sources.list.d/wezterm.list
 chmod 644 /usr/share/keyrings/wezterm-fury.gpg
 
-cp ./raccoon.png /home/${USER}/Images/wallpapers
+cp ./raccoon.png "${USER_HOME}/Images/wallpapers/"
 gsettings set org.gnome.desktop.background picture-uri "file:///home/${USER}/Images/wallpapers/raccoon.png"
 gsettings set org.gnome.desktop.background picture-uri-dark "file:///home/${USER}/Images/wallpapers/raccoon.png"
 
