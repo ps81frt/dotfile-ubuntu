@@ -221,24 +221,33 @@ config.window_frame = {
 }
 
 config.mouse_bindings = {
-	-- clic droit = coller
-	{
-		event = { Down = { streak = 1, button = "Right" } },
-		mods = "NONE",
-		action = wezterm.action.PasteFrom("Clipboard"),
-	},
-	-- CTRL + molette haut = zoom in
-	{
-		event = { Down = { streak = 1, button = { WheelUp = 1 } } },
-		mods = "CTRL",
-		action = wezterm.action.EmitEvent("zoom-font-in"),
-	},
-	-- CTRL + molette bas = zoom out
-	{
-		event = { Down = { streak = 1, button = { WheelDown = 1 } } },
-		mods = "CTRL",
-		action = wezterm.action.EmitEvent("zoom-font-out"),
-	},
+  -- clic droit = coller
+  {
+    event = { Down = { streak = 1, button = "Right" } },
+    mods = "NONE",
+    action = wezterm.action.PasteFrom("Clipboard"),
+  },
+
+  -- SUPER + drag = Déplacé la fenêtre 
+  {
+    event = { Drag = { streak = 1, button = "Left" } },
+    mods = "SUPER",
+    action = wezterm.action.StartWindowDrag,
+  },
+
+  -- CTRL + molette haut = zoom in
+  {
+    event = { Down = { streak = 1, button = { WheelUp = 1 } } },
+    mods = "CTRL",
+    action = wezterm.action.EmitEvent("zoom-font-in"),
+  },
+
+  -- CTRL + molette bas = zoom out
+  {
+    event = { Down = { streak = 1, button = { WheelDown = 1 } } },
+    mods = "CTRL",
+    action = wezterm.action.EmitEvent("zoom-font-out"),
+  },
 }
 
 -- =========================
