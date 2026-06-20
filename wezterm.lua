@@ -42,6 +42,10 @@ config.enable_tab_bar = false
 config.audible_bell = "Disabled"
 config.scrollback_lines = 5000
 config.default_cursor_style = "BlinkingBlock"
+config.enable_scroll_bar = true
+config.colors = {
+	scrollbar_thumb = "#7aa2f7",
+}
 
 config.pane_focus_follows_mouse = true
 
